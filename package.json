@@ -4,7 +4,8 @@
   "description": "An application for budget management, which gets incomes and expenses data and show useful information and charts",
   "main": "dev.js",
   "scripts": {
-    "start": "nodemon"
+    "start": "nodemon",
+    "scss": "node-sass scss/main.scss public/main.css --watch -o"
   },
   "author": "Matheus Baldissara",
   "license": "MIT",
@@ -12,6 +13,8 @@
     "browser-sync": "^2.23.6",
     "express": "^4.16.2",
     "express-handlebars": "^3.0.0",
+    "mongoose": "^5.0.6",
+    "node-sass": "^4.7.2",
     "nodemon": "^1.15.0"
   }
 }

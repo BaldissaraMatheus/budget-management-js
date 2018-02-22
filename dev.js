@@ -1,8 +1,20 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const mongoose = require('mongoose');
+const sassMiddleware = require('node-sass-middleware');
+const sass = require('node-sass');
+const path = require('path');
 const app = express();
 const port = 5000;
 // const browsersync = require('browser-sync');
+
+// Define a pasta 'public' como a pasta static do express
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Conecta com mongoose
+mongoose.connect('mongodb://localhost/budget-management')
+  .then(() => console.log('Banco de dados conectado'))
+  .catch((err) => console.log(err));
 
 // Handlebars middleware
 app.engine('handlebars', exphbs({
