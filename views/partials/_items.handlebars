@@ -1,13 +1,27 @@
 <section class='display-items'>
-  <div class='dropdown'>Filtro</div>
-  <div class='dropdown category'>
-    <ul>
-      <li class='item'></li>
-        <img src='' alt=''>
-        <h2>Título</h2>
-        <h3>Valor</h3>
-        <h4>Data</h4>
-      </li>
-    </ul>
-  </div>
+  <div class='container card'>
+    <select class='dropdown dropdown--filter'>
+      <option value='all'>Tudo</option>
+      <option value='exp'>Despesas</option>
+      <option value='inc'>Rendas</option>
+    </select>
+        <div class='card__head'>
+          <img src='https://dummyimage.com/50x50/000/fff' class='card__pic'>
+          <div class='card__data'>
+            <h3>Entreterimento<h3>
+            <h5>R$100,00</h5>
+          </div>
+        </div>
+        <ul class='card__list'>
+          <li class='card__list__item'>
+            <div class='item__main-data'>
+              <h4>Netflix Music</h4>
+              <h5>R$100,00</h5>
+            </div>
+            <div class='item__main-data'>
+              <h6>23/02/2018</h6>
+            </div> 
+          </li>
+        </ul>
+    </div>
 </section>

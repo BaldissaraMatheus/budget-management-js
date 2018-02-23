@@ -1,10 +1,26 @@
-<section class='charts'>
-  <select class='dropdown'>
-    <option value='all'>Tudo</option>
-    <option value='inc'>Rendas</option>
-    <option value='exp'>Despesas</option>
-  </select>
-  <div class='chart chart--main'></div>
-  <div class='chart chart--expenses'></div>
-  <div class='chart chart--incomes'></div>
+<section class='charts-section'>
+  <div class='container'>
+    <select class='dropdown dropdown--add-budget-full'>
+      <option value='all'>Adicionar</option>
+    </select>
+    <div class='charts'>
+      <div class='chart chart--main'>
+        <h2>Balanço Geral</h2>
+        <img src='https://dummyimage.com/200x200/000/fff' alt='Balanço Geral'>
+        <h3>$VALOR</h3>
+      </div>
+      <div class='chart chart--expenses'>
+        <h2>Despesas</h2>
+        <img src='https://dummyimage.com/200x200/000/fff' alt='Despesas'>
+        <h3>-$VALOR</h3>
+        <h6 class='percentage'>$PORCENTAGEM% de todo o saldo</h6>
+      </div>
+      <div class='chart chart--incomes'>
+        <h2>Rendas</h2>
+        <img src='https://dummyimage.com/200x200/000/fff' alt='Rendas'>
+        <h3>+$VALOR</h3>
+      </div>
+    </div>
+
+  </div>
 </section>

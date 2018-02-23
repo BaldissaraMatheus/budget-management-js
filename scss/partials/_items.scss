@@ -1,0 +1,45 @@
+.dropdown--filter {
+  display: block;
+
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
+}
+
+.card {
+  padding: 0;
+}
+
+.card__pic {
+  display: block;
+  float: left;
+}
+
+.card__data {
+  display: inline-block;
+  margin-left: 15px;
+}
+
+.card__container {
+  height: auto;
+}
+
+.card__head {
+  padding: 15px 15px;
+  background-color: $light-gray;
+}
+
+.card__list {
+  width: 100%;
+  padding: 5px 20px;
+}
+
+.card__list__item {
+  background-color: $white;
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn--confirm {
+  display: none;
+}

@@ -1,0 +1,32 @@
+.charts {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  text-align: center;
+  padding: 15px;
+}
+
+.chart {
+  padding: 10px;
+
+  @media screen and (min-width: 1200px) {
+    padding: 20px;
+  }
+
+  .percentage {
+    color: $red;
+    margin-top: -17px;
+  }
+}
+
+.dropdown--add-budget-full {
+  display: none;
+  float: left;
+  margin-right: 20px;
+  
+  @media screen and (min-width: 768px) {
+    display: block;
+    position: absolute;
+  }
+}

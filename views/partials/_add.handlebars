@@ -1,19 +1,22 @@
-<section class='add-form'>
-  <form action='/' method='post'>
-    <select name='type' id='type'>
-      <option value='inc'>+</option>
-      <option value='exp'>-</option>
-    </select>
-    <label for='name' name='desc' id='desc'>Descrição</label>
-    <select name='category' id='category' disabled>
-      <option value='food'>Comida</option>
-      <option value='ent'>Entreterimento</option>
-      <option value='sal'>Salário</option>
-    </select>
-    <label for='value' name='value' id='value'>R$</label>
-    <div class="btn">
-      <button type="submit">ENTRAR</button>
-    </div>
-  </form>
+<section class='add-section'>
+  <div class='container'>
+    <h2>Adicionar</h2>
+    <form action='/' method='post' class='form-container'>
+      <select name='type' id='type' class='form__element'>
+        <option value='inc'>+</option>
+        <option value='exp'>-</option>
+      </select>
+      <input for='text' id='desc' class='form__element form__input form__input--desc' placeholder='Descrição'>
+      <select name='category' id='category' class='form__element form__category' disabled>
+        <option value='food'>Comida</option>
+        <option value='ent'>Entreterimento</option>
+        <option value='sal'>Salário</option>
+      </select>
+      <input for='value' id='value' class='form__element form__input form__input--value' placeholder='R$0,00'>
+      <div class="btn form__element">
+        <button type="submit">ENTRAR</button>
+      </div>
+    </form>
+  </div>
 </section>
-<div class='btn call-form-btn'>+</div>
+<div class='btn btn--confirm'>+</div>
