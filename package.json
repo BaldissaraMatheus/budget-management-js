@@ -1,11 +1,11 @@
 {
   "name": "budget-management",
   "version": "1.0.0",
-  "description": "An application for budget management, which gets incomes and expenses data and show useful information and charts",
+  "description": "An application for budget management, which gets incomes and expenses data and show useful information and generate charts over it",
   "main": "dev.js",
   "scripts": {
     "start": "nodemon",
-    "scss": "node-sass scss/main.scss public/main.css --watch -o"
+    "scss": "node-sass scss/main.scss public/main.css --watch -o --output-style compressed"
   },
   "author": "Matheus Baldissara",
   "license": "MIT",

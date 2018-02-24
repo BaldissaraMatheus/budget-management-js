@@ -1,5 +1,8 @@
-.dropdown--filter {
+.select--filter {
   display: block;
+  height: 30px;
+  background: $white;
+  margin: 20px 0 0 10px;
 
   @media screen and (min-width: 768px) {
     display: none;
@@ -8,6 +11,24 @@
 
 .card {
   padding: 0;
+  margin: 15px 0 15px 0;
+  width: 100%;
+  display: block;
+  overflow: auto;
+  @media screen and (min-width: 768px) {
+    width: 49%;
+  }
+}
+
+.inc {
+  float: right;
+}
+
+.exp {
+  float: right;
+  @media screen and (min-width: 768px) {
+    float: left;
+  }
 }
 
 .card__pic {
@@ -18,10 +39,7 @@
 .card__data {
   display: inline-block;
   margin-left: 15px;
-}
-
-.card__container {
-  height: auto;
+  margin-top: -5px;
 }
 
 .card__head {
@@ -31,15 +49,22 @@
 
 .card__list {
   width: 100%;
-  padding: 5px 20px;
+  padding: 15px 15px;
+  margin: 0;
+  background-color: $white;
 }
 
 .card__list__item {
   background-color: $white;
   display: flex;
   justify-content: space-between;
+  margin-bottom: 15px
 }
 
-.btn--confirm {
-  display: none;
+.exp .data__value {
+  color: $red;
+}
+
+.inc .data__value {
+  color: $green;
 }

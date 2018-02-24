@@ -26,3 +26,7 @@ a {
 ul {
   list-style-type: none;
 }
+
+.shadow {
+  @include box-shadow(10px, 10px, 20px, lighten($dark-gray, 10%))
+}

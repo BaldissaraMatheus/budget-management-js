@@ -1,22 +1,20 @@
 <section class='add-section'>
-  <div class='container'>
-    <h2>Adicionar</h2>
-    <form action='/' method='post' class='form-container'>
-      <select name='type' id='type' class='form__element'>
+  <div class='container shadow'>
+    <h2 class='form__title'>Adicionar</h2>
+    <form action='/' method='post' class='form'>
+      <select name='type' id='type' class='form__element form__select select'>
         <option value='inc'>+</option>
         <option value='exp'>-</option>
       </select>
       <input for='text' id='desc' class='form__element form__input form__input--desc' placeholder='Descrição'>
-      <select name='category' id='category' class='form__element form__category' disabled>
+      <select name='category' id='category' class='form__element form__select select' disabled>
         <option value='food'>Comida</option>
         <option value='ent'>Entreterimento</option>
         <option value='sal'>Salário</option>
       </select>
       <input for='value' id='value' class='form__element form__input form__input--value' placeholder='R$0,00'>
-      <div class="btn form__element">
-        <button type="submit">ENTRAR</button>
-      </div>
+      <button type='submit' class='form__element btn btn--submit'>ENTRAR</button>
     </form>
   </div>
 </section>
-<div class='btn btn--confirm'>+</div>
+<a class='btn btn--create' href='#'>+</a>

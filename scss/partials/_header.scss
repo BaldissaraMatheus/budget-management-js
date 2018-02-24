@@ -13,34 +13,34 @@
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-between;
+  margin-top:8px;
+}
 
-  .nav__title {
-    margin-top: -10px;
+.nav-list {
+    margin-top: 8px
+}
+
+.nav__title {
+  display: none;
+  @media screen and (min-width: 768px) {
+    display: block;
+  }
+}
+
+.dropdown--add-budget-mbl {
+  @media screen and (min-width: 768px) {
     display: none;
-    @media screen and (min-width: 768px) {
-      display: block;
-    }
   }
+}
 
-  .dropdown--add-budget-mbl {
-    @media screen and (min-width: 768px) {
-      display: none;
-    }
-  }
-  
-  .nav-list {
-    margin-top: 15px;
+.nav-list__item {
+  display: inline;
+  padding-left: 10px;
+}
 
-    .nav-list__item {
-      display: inline;
-      padding-left: 10px;
-    }
-
-    .nav-list__item:nth-child(1) {
-      display: none;
-      @media screen and (min-width: 768px) {
-        display: inline-block;
-      }
-    }
+.nav-list__item:nth-child(1) {
+  display: none;
+  @media screen and (min-width: 768px) {
+    display: inline-block;
   }
 }

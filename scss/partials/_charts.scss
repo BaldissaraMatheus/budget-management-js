@@ -13,17 +13,30 @@
   @media screen and (min-width: 1200px) {
     padding: 20px;
   }
-
-  .percentage {
-    color: $red;
-    margin-top: -17px;
-  }
 }
 
-.dropdown--add-budget-full {
+.chart__title {
+  margin-bottom: 8px; 
+}
+
+.chart__percentage {
+  color: $red;
+}
+
+.chart__chart {
+  margin-bottom: 8px; 
+}
+
+.select--add-budget-full {
   display: none;
   float: left;
   margin-right: 20px;
+  width: 150px;
+  height: 35px;
+  border-radius: 3px;
+  outline: none;
+  vertical-align: middle;
+  padding-left: 5px;
   
   @media screen and (min-width: 768px) {
     display: block;
