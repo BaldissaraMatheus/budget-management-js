@@ -6,18 +6,18 @@
     <div class='charts'>
       <div class='chart chart--main'>
         <h2 class='chart__title'>Balanço Geral</h2>
-        <img src='https://dummyimage.com/200x200/000/fff' class='chart__chart' alt='Balanço Geral'>
+        <canvas id='chart--general' class='chart__pie aa'></canvas>
         <h2>$VALOR</h2>
       </div>
-      <div class='chart chart--expenses'>
+      <div class='chart chart--exp'>
         <h2 class='chart__title'>Despesas</h2>
-        <img src='https://dummyimage.com/200x200/000/fff' class='chart__chart' alt='Despesas'>
+        <canvas id='chart--exp' class='chart__pie'></canvas>
         <h2>-$VALOR</h2>
         <h6 class='chart__percentage'>$PORCENTAGEM% de todo o saldo</h6>
       </div>
-      <div class='chart chart--incomes'>
+      <div class='chart chart--inc'>
         <h2 class='chart__title'>Rendas</h2>
-        <img src='https://dummyimage.com/200x200/000/fff' class='chart__chart' alt='Rendas'>
+        <canvas id='chart--inc' class='chart__pie'></canvas>
         <h2>+$VALOR</h2>
       </div>
     </div>

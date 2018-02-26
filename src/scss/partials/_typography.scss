@@ -1,0 +1,57 @@
+* {
+  font-family: 'Work Sans', 'Open Sans', 'Helvenica', sans-serif;
+  color: $black;
+}
+
+strong {
+  font-weight: 500;
+  margin: 0;
+}
+
+em {
+  font-weight: 200;
+  margin: 0;
+}
+
+p {
+  font-size: 15px;
+  line-height: 24px;
+  @extend em
+}
+
+h6 {
+  font-size: 13px;
+  line-height: 22.5px;
+  @extend em
+}
+
+h5 {
+  font-size: 15px;
+  line-height: 30px;
+  @extend strong
+}
+
+h4 {
+  font-size: 17px;
+  line-height: 30px;
+  @extend em
+}
+
+h3 {
+  font-size: 17px;
+  line-height: 30px;
+  @extend strong
+}
+
+h2 {
+  font-size: 21px;
+  line-height: 36px;
+  @extend em
+}
+
+h1 {
+  font-size: 25px;
+  line-height: 36px;
+  @extend strong
+}
+

@@ -1,0 +1,32 @@
+@import 'vendor/_normalize.scss';
+
+@import 'partials/_base.scss';
+@import 'partials/_grid';
+@import 'partials/_typography';
+@import 'partials/_header';
+@import 'partials/_charts';
+@import 'partials/_add';
+@import 'partials/_items';
+
+*,
+*:before,
+*:after {
+  @include box-sizing(border-box);
+}
+
+body {
+  background-color: $gray;
+  font-weight: 200;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul {
+  list-style-type: none;
+}
+
+.shadow {
+  @include box-shadow(10px, 10px, 20px, lighten($dark-gray, 10%))
+}

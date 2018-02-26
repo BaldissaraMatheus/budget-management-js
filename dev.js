@@ -1,7 +1,6 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
-const sassMiddleware = require('node-sass-middleware');
 const sass = require('node-sass');
 const path = require('path');
 const app = express();

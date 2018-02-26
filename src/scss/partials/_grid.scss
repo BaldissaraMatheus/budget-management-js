@@ -1,0 +1,13 @@
+.container {
+  max-width: 1024px;
+  margin: 25px auto 0px auto;
+  overflow: hidden;
+  position: relative;
+  padding: 15px;
+  background-color: $white;
+}
+
+.container--no-pad{
+  padding: 0;
+  background-color: transparent;
+}

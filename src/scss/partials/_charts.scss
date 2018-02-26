@@ -1,0 +1,64 @@
+.charts {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  text-align: center;
+  padding: 15px;
+  overflow: auto;
+  @media screen and (min-width: 1200px) {
+    padding: 20px;
+    overflow: hidden;
+  }
+}
+
+.chart {
+  padding: 10px;
+  margin-top: 20px;
+
+  // Tentar estilizar essa budega
+
+  /*
+  @media screen and (min-width: 768px) {
+    padding: 20px;
+    margin-right: -150px;
+  }
+  */
+}
+
+.chart__title {
+  margin-bottom: 8px; 
+}
+
+.chart__percentage {
+  color: $red;
+}
+
+.chart__pie { 
+  width: 400px;
+  height: 200px;
+  margin: 0;
+  padding: 0;
+  
+}
+
+.chart--inc {
+  margin-right: 0;
+}
+
+.select--add-budget-full {
+  display: none;
+  float: left;
+  margin-right: 20px;
+  width: 150px;
+  height: 35px;
+  border-radius: 3px;
+  outline: none;
+  vertical-align: middle;
+  padding-left: 5px;
+  
+  @media screen and (min-width: 768px) {
+    display: block;
+    position: absolute;
+  }
+}
