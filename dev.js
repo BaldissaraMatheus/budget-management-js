@@ -1,13 +1,21 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
-const sass = require('node-sass');
+const sassmiddleware = require('node-sass-middleware');
 const path = require('path');
 const app = express();
 const port = 5000;
 // const browsersync = require('browser-sync');
 
-// Define a pasta 'public' como a pasta static do express
+app.use(
+  sassmiddleware({
+      src: __dirname + '/src/scss', 
+      dest: __dirname + '/public',
+      outputStyle: 'compressed',
+      debug: true,       
+  })
+);   
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Conecta com mongoose

@@ -57,84 +57,90 @@ var UICtrl = function UIController() {
   // add new item to UI
   // Update budget on UI
 
-  var displayCharts = function displayChartsFunction() {
-    var chartGnrlEl = document.getElementById('chart--general').getContext('2d');
-    var chartExpEl = document.getElementById('chart--exp').getContext('2d');
-    var chartIncEl = document.getElementById('chart--inc').getContext('2d');
-    var green = '#50CC80';
-    var red = '#F8545F';
-
-    Chart.defaults.global.responsive = false;
-
-    var chartGnrl = new Chart(chartGnrlEl, {
-      type: 'pie',
-      data: {
-        labels: ['Rendas', 'Despesas'],
-        datasets: [{
-          data: [50, 27],
-
-          backgroundColor: [green, red]
-        }]
-      },
-
-      options: {
-        legend: {
-          display: true
-        }
-      }
-    });
-
-    var chartExp = new Chart(chartExpEl, {
-      type: 'pie',
-      data: {
-        labels: ['Entreterimento', 'Transporte', 'Comida'],
-        datasets: [{
-          data: [1, 2, 3],
-
-          backgroundColor: [green, red]
-        }]
-      },
-
-      options: {
-        legend: {
-          display: true
-        }
-      }
-    });
-
-    var chartInc = new Chart(chartIncEl, {
-      type: 'pie',
-      data: {
-        labels: ['Salário'],
-        datasets: [{
-          data: [100],
-
-          backgroundColor: [green]
-        }]
-      },
-
-      options: {
-        legend: {
-          display: true
-        }
-      }
-    });
-  };
-
   return {
-    batata: function batata() {
-      displayCharts();
+    displayCharts: function displayCharts(winWidth) {
+      var chartGnrlEl = document.getElementById('chart--general').getContext('2d');
+      var chartExpEl = document.getElementById('chart--exp').getContext('2d');
+      var chartIncEl = document.getElementById('chart--inc').getContext('2d');
+      var green = '#50CC80';
+      var red = '#F8545F';
+
+      var legDisplay = true;
+
+      if (winWidth >= 768) {
+        legDisplay = false;
+      }
+
+      Chart.defaults.global.responsive = true;
+      Chart.defaults.global.legend.display = legDisplay;
+
+      var chartGnrl = new Chart(chartGnrlEl, {
+        type: 'pie',
+        data: {
+          labels: ['Rendas', 'Despesas'],
+          datasets: [{
+            data: [50, 27],
+
+            backgroundColor: [green, red]
+          }]
+        }
+      });
+
+      var chartExp = new Chart(chartExpEl, {
+        type: 'pie',
+        data: {
+          labels: ['Entreterimento', 'Transporte', 'Comida'],
+          datasets: [{
+            data: [1, 2, 3],
+
+            backgroundColor: [green, red]
+          }]
+        }
+      });
+
+      var chartInc = new Chart(chartIncEl, {
+        type: 'pie',
+        data: {
+          labels: ['Salário'],
+          datasets: [{
+            data: [100],
+
+            backgroundColor: [green]
+          }]
+        }
+      });
+
+      var charts = [chartGnrl, chartExp, chartInc];
+      return charts;
     }
   };
 }();
 
 var mainCtrl = function generalController(dataCtrl, UICtrl) {
-  var evtLst = function setEventListeners() {};
+  var winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+
+  if (winWidth < 768) {
+    var mobileDevice = true;
+  } else {
+    var _mobileDevice = false;
+  }
+
+  var createCharts = function createAndGetChartsFromTheUIController(winWidth) {
+    var charts = UICtrl.displayCharts(winWidth);
+    return charts;
+  };
+
+  var charts = void 0;
+
+  var setEvtLst = function setEventListeners() {};
+
+  console.log(charts);
 
   return {
     init: function init() {
-      console.log('Js rodando');
-      UICtrl.batata();
+      console.log('Js rodandoooo');
+      charts = createCharts(winWidth);
+      setEvtLst();
     }
   };
 }(dataCtrl, UICtrl);

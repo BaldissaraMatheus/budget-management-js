@@ -55,104 +55,110 @@ const UICtrl = (function UIController() {
   // add new item to UI
   // Update budget on UI
 
-  const displayCharts = function displayChartsFunction() {
-    let chartGnrlEl = document.getElementById('chart--general').getContext('2d');
-    let chartExpEl = document.getElementById('chart--exp').getContext('2d');
-    let chartIncEl = document.getElementById('chart--inc').getContext('2d');
-    const green = '#50CC80';
-    const red = '#F8545F';
-  
-    Chart.defaults.global.responsive = false;
-  
-    let chartGnrl = new Chart(chartGnrlEl, {
-      type: 'pie',
-      data:{
-        labels:['Rendas', 'Despesas'],
-        datasets:[{
-          data: [
-            50,
-            27
-          ],
-  
-        backgroundColor:[
-          green,
-          red,
-        ]
-        }]
-      },
-  
-      options:{
-        legend: {
-          display: true
-        },
-      }
-    });
-  
-    let chartExp = new Chart(chartExpEl, {
-      type: 'pie',
-      data:{
-        labels:['Entreterimento', 'Transporte', 'Comida'],
-        datasets:[{
-          data: [
-            1,
-            2,
-            3
-          ],
-  
-        backgroundColor:[
-          green,
-          red,
-        ]
-        }]
-      },
-  
-      options:{
-        legend: {
-          display: true
-        },
-      }
-    });
-  
-    let chartInc = new Chart(chartIncEl, {
-      type: 'pie',
-      data:{
-        labels:['Salário'],
-        datasets:[{
-          data: [
-            100
-          ],
-  
-        backgroundColor:[
-          green,
-        ]
-        }]
-      },
-  
-      options:{
-        legend: {
-          display: true
-        },
-      }
-    });
-  };
-
   return {
-    batata: function() {
-      displayCharts();
-    }
+    displayCharts: (winWidth) => {
+      let chartGnrlEl = document.getElementById('chart--general').getContext('2d');
+      let chartExpEl = document.getElementById('chart--exp').getContext('2d');
+      let chartIncEl = document.getElementById('chart--inc').getContext('2d');
+      const green = '#50CC80';
+      const red = '#F8545F';
+  
+      let legDisplay = true;
+  
+      if (winWidth >= 768) {
+        legDisplay = false;
+      }
+  
+      Chart.defaults.global.responsive = true;
+      Chart.defaults.global.legend.display = legDisplay;
+
+      let chartGnrl = new Chart(chartGnrlEl, {
+        type: 'pie',
+        data:{
+          labels:['Rendas', 'Despesas'],
+          datasets:[{
+            data: [
+              50,
+              27
+            ],
+    
+          backgroundColor:[
+            green,
+            red,
+          ]
+          }]
+        }
+      });
+    
+      let chartExp = new Chart(chartExpEl, {
+        type: 'pie',
+        data:{
+          labels:['Entreterimento', 'Transporte', 'Comida'],
+          datasets:[{
+            data: [
+              1,
+              2,
+              3
+            ],
+    
+          backgroundColor:[
+            green,
+            red,
+          ]
+          }]
+        }
+      });
+    
+      let chartInc = new Chart(chartIncEl, {
+        type: 'pie',
+        data:{
+          labels:['Salário'],
+          datasets:[{
+            data: [
+              100
+            ],
+    
+          backgroundColor:[
+            green,
+          ]
+          }]
+        }
+      });
+
+      const charts = [chartGnrl, chartExp, chartInc];
+      return charts;
+    },
   };
 }());
 
 const mainCtrl = (function generalController(dataCtrl, UICtrl) {
-  const evtLst = function setEventListeners() {
+  let winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+
+  if (winWidth < 768) {
+    let mobileDevice = true;
+  } else {
+    let mobileDevice = false;
+  }
+
+  const createCharts = function createAndGetChartsFromTheUIController(winWidth) {
+    const charts = UICtrl.displayCharts(winWidth);
+    return charts;
+  };
+
+  let charts;
+
+  const setEvtLst = function setEventListeners() {
+
 
   };
 
+  console.log(charts);
+
   return {
     init: function() {
-      console.log('Js rodando');
-      UICtrl.batata();
-
+      console.log('Js rodandoooo');
+      charts = createCharts(winWidth);
+      setEvtLst();
     }
   };
 }(dataCtrl, UICtrl));
