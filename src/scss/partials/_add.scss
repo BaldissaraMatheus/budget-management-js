@@ -43,7 +43,7 @@
   width: 150px;
 }
 
-.form__category {
+.form__select-group {
   width: 200px;
 }
 
@@ -53,7 +53,7 @@
   color: $white;
 }
 
-.btn--submit {
+.btn--add {
   width: 100px;
   cursor: pointer;
   @include box-shadow(5px, 5px, 10px, lighten($dark-gray, 10%))
@@ -70,7 +70,7 @@
   text-align: center;
   padding: 4px 1px 0 0;
   @include border-radius(25px);
-  @include box-shadow(2px, 2px, 10px, lighten($dark-gray, 10%))
+  @include box-shadow(2px, 2px, 10px, lighten($dark-gray, 10%));
 
   @media screen and (min-width: 768px) {
     display: none;

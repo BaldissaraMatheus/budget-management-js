@@ -1,19 +1,19 @@
 <section class='add-section'>
   <div class='container shadow'>
     <h2 class='form__title'>Adicionar</h2>
-    <form action='/' method='post' class='form'>
+    <form action='' class='form'>
       <select name='type' id='type' class='form__element form__select select'>
         <option value='inc'>+</option>
         <option value='exp'>-</option>
       </select>
       <input for='text' id='desc' class='form__element form__input form__input--desc' placeholder='Descrição'>
-      <select name='category' id='category' class='form__element form__select select'>
+      <select name='group' id='group' class='form__element form__select form__select-group select'>
         <option value='food'>Comida</option>
         <option value='ent'>Entreterimento</option>
         <option value='sal'>Salário</option>
       </select>
       <input for='value' id='value' class='form__element form__input form__input--value' placeholder='R$0,00'>
-      <button type='submit' class='form__element btn btn--submit'>ENTRAR</button>
+      <button id='add-btn' class='form__element btn btn--add'>ENTRAR</button>
     </form>
   </div>
 </section>

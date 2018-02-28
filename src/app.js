@@ -47,6 +47,7 @@ const dataCtrl = (function dataController() {
   return {
 
   };
+
 }());
 
 const UICtrl = (function UIController() {
@@ -54,8 +55,20 @@ const UICtrl = (function UIController() {
   // Get input values
   // add new item to UI
   // Update budget on UI
+  
+  const DOMstrings = {
+    addBtn: '#add-btn',
+    inputValue: '#value',
+    selectGroup: '#group',
+    inputDesc: '#desc',
+    selectType: '#type'
+  };
 
   return {
+    getDOMstrings: () => {
+      return DOMstrings;
+    },
+    
     displayCharts: (winWidth) => {
       let chartGnrlEl = document.getElementById('chart--general').getContext('2d');
       let chartExpEl = document.getElementById('chart--exp').getContext('2d');
@@ -128,14 +141,17 @@ const UICtrl = (function UIController() {
       const charts = [chartGnrl, chartExp, chartInc];
       return charts;
     },
+
   };
 }());
 
 const mainCtrl = (function generalController(dataCtrl, UICtrl) {
   let winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  let charts;
 
   if (winWidth < 768) {
     let mobileDevice = true;
+
   } else {
     let mobileDevice = false;
   }
@@ -145,14 +161,15 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     return charts;
   };
 
-  let charts;
-
-  const setEvtLst = function setEventListeners() {
-
-
+  const foo = function() {
+    console.log('test');
   };
 
-  console.log(charts);
+  const setEvtLst = function setEventListeners() {
+    const DOMobj = UICtrl.getDOMstrings();
+    document.querySelector(DOMobj.addBtn).addEventListener('click', foo);
+  
+  };
 
   return {
     init: function() {

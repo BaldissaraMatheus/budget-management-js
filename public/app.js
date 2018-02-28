@@ -57,7 +57,19 @@ var UICtrl = function UIController() {
   // add new item to UI
   // Update budget on UI
 
+  var DOMstrings = {
+    addBtn: '#add-btn',
+    inputValue: '#value',
+    selectGroup: '#group',
+    inputDesc: '#desc',
+    selectType: '#type'
+  };
+
   return {
+    getDOMstrings: function getDOMstrings() {
+      return DOMstrings;
+    },
+
     displayCharts: function displayCharts(winWidth) {
       var chartGnrlEl = document.getElementById('chart--general').getContext('2d');
       var chartExpEl = document.getElementById('chart--exp').getContext('2d');
@@ -113,11 +125,13 @@ var UICtrl = function UIController() {
       var charts = [chartGnrl, chartExp, chartInc];
       return charts;
     }
+
   };
 }();
 
 var mainCtrl = function generalController(dataCtrl, UICtrl) {
   var winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  var charts = void 0;
 
   if (winWidth < 768) {
     var mobileDevice = true;
@@ -130,11 +144,14 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     return charts;
   };
 
-  var charts = void 0;
+  var foo = function foo() {
+    console.log('test');
+  };
 
-  var setEvtLst = function setEventListeners() {};
-
-  console.log(charts);
+  var setEvtLst = function setEventListeners() {
+    var DOMobj = UICtrl.getDOMstrings();
+    document.querySelector(DOMobj.addBtn).addEventListener('click', foo);
+  };
 
   return {
     init: function init() {
