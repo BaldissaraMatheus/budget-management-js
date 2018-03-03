@@ -2,6 +2,7 @@
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// Precisa importar o polyfill
 var dataCtrl = function dataController() {
   var Group = function Group(name, type, total_value, items) {
     _classCallCheck(this, Group);
@@ -36,30 +37,24 @@ var dataCtrl = function dataController() {
 
     // Fazer isso aqui funcionar, acho q precisa de polyfill
     addGroup: function addGroup(group, type) {
-      var newGroup = void 0;
       var pos = void 0;
 
-      if (data.groups) {
-        pos = data.groups.find(function (el, index, array) {
-          if (el.name === group) {
-            console.log(index);
-            return index;
-          } else {
-            console.log('false');
-            return false;
-          }
+      if (data.groups.length != 0) {
+        console.log('data.groups não está vazio');
+        pos = data.groups.findIndex(function (obj, index) {
+          return obj.name === group;
         });
-        console.log(pos);
+        console.log('pos = ' + pos);
       }
 
-      if (!pos) {
-        //console.log('pos = undefined');
-        newGroup = new Group(group, type, 0);
+      if (pos < 0 || pos === undefined) {
+        console.log('N\xE3o encontrou esse grupo, ent\xE3o ser\xE1 criado um novo gupo para ' + group);
+        var newGroup = new Group(group, type, 0);
         data.groups.push(newGroup);
-        console.log(newGroup + ' na posicao 0');
+        console.log(newGroup);
         return newGroup;
       } else {
-        console.log(newGroup + ' na posicao ' + pos);
+        console.log('Grupo foi encontrado na posicao ' + pos);
         return data.groups[pos];
       }
     },

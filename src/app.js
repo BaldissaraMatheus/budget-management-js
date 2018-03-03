@@ -1,3 +1,4 @@
+// Precisa importar o polyfill
 const dataCtrl = (function dataController() {
 
   class Group {
@@ -33,32 +34,23 @@ const dataCtrl = (function dataController() {
 
     // Fazer isso aqui funcionar, acho q precisa de polyfill
     addGroup: (group, type) => {
-      let newGroup;
       let pos;
 
-      if (data.groups) {
-        pos = data.groups.find((el, index, array) => {
-          if (el.name === group) {
-            console.log(index);
-            return index;
-            
-          } else {
-            console.log('false');
-            return false;
-          }
-        });
-        console.log(pos);
+      if (data.groups.length != 0) {
+        console.log('data.groups não está vazio');
+        pos = data.groups.findIndex((obj, index) => (obj.name === group));
+        console.log(`pos = ${pos}`);
       }
 
-      if (!pos) {
-        //console.log('pos = undefined');
-        newGroup = new Group(group, type, 0);
+      if (pos < 0 || pos === undefined) {
+        console.log(`Não encontrou esse grupo, então será criado um novo gupo para ${group}`);
+        const newGroup = new Group(group, type, 0);
         data.groups.push(newGroup);
-        console.log(`${newGroup} na posicao 0`);
+        console.log(newGroup);
         return newGroup;
 
       } else {
-        console.log(`${newGroup} na posicao ${pos}`);
+        console.log(`Grupo foi encontrado na posicao ${pos}`);
         return data.groups[pos];     
       }
     },
