@@ -5,7 +5,6 @@ const sassmiddleware = require('node-sass-middleware');
 const path = require('path');
 const app = express();
 const port = 5000;
-// const browsersync = require('browser-sync');
 
 app.use(
   sassmiddleware({

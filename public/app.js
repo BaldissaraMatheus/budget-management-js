@@ -3,13 +3,8 @@
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var dataCtrl = function dataController() {
-
-  // Card e item vão ficar no banco de dados
-  // Expenses e Incomes vão ficar na estrutura de datos interna
-
-  // O group do item vai ser o name do card que ele ficará
-  var Card = function Card(name, type, total_value, items) {
-    _classCallCheck(this, Card);
+  var Group = function Group(name, type, total_value, items) {
+    _classCallCheck(this, Group);
 
     this.name = name;
     this.type = type;
@@ -17,13 +12,12 @@ var dataCtrl = function dataController() {
     this.items = items;
   };
 
-  var Item = function Item(id, type, desc, group, value, date) {
+  var Item = function Item(id, group, desc, value, date) {
     _classCallCheck(this, Item);
 
     this.id = id;
-    this.type = type;
-    this.desc = desc;
     this.group = group;
+    this.desc = desc;
     this.value = value;
     this.date = date;
   };
@@ -36,19 +30,58 @@ var dataCtrl = function dataController() {
     }
   };
 
-  var group1 = {
-    name: 'hehehe',
-    value: 50
-  };
-
-  var group2 = {
-    name: 'rsrsrs',
-    value: 150
-  };
-
   // Add new item to database
   // Calculate budget
-  return {};
+  return {
+
+    // Fazer isso aqui funcionar, acho q precisa de polyfill
+    addGroup: function addGroup(group, type) {
+      var newGroup = void 0;
+      var pos = void 0;
+
+      if (data.groups) {
+        pos = data.groups.find(function (el, index, array) {
+          if (el.name === group) {
+            console.log(index);
+            return index;
+          } else {
+            console.log('false');
+            return false;
+          }
+        });
+        console.log(pos);
+      }
+
+      if (!pos) {
+        //console.log('pos = undefined');
+        newGroup = new Group(group, type, 0);
+        data.groups.push(newGroup);
+        console.log(newGroup + ' na posicao 0');
+        return newGroup;
+      } else {
+        console.log(newGroup + ' na posicao ' + pos);
+        return data.groups[pos];
+      }
+    },
+
+    addItem: function addItem(group, type, desc, val) {
+      var newItem = void 0;
+      var id = 0;
+      var date = new Date();
+
+      // Usar o metodo find pra achar o grupo que tenha o nome como group
+      /*
+      if (data.groups[group].length > 0){
+        id = data.groups[group][data.groups[group].length - 1].id + 1;
+      }    
+      */
+
+      newItem = new Item(id, group, desc, val, date);
+      // data.groups[group].push(newItem);
+
+      return newItem;
+    }
+  };
 }();
 
 var UICtrl = function UIController() {
@@ -68,6 +101,15 @@ var UICtrl = function UIController() {
   return {
     getDOMstrings: function getDOMstrings() {
       return DOMstrings;
+    },
+
+    getInput: function getInput() {
+      return {
+        group: document.querySelector(DOMstrings.selectGroup).value,
+        desc: document.querySelector(DOMstrings.inputDesc).value,
+        type: document.querySelector(DOMstrings.selectType).value,
+        value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
+      };
     },
 
     displayCharts: function displayCharts(winWidth) {
@@ -145,7 +187,16 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
   };
 
   var foo = function foo() {
-    console.log('test');
+    var input = UICtrl.getInput();
+    var newItem = void 0;
+    var newGroup = void 0;
+    if (!isNaN(input.value)) {
+      if (input.desc === '') input.desc = 'Sem descrição';
+      newGroup = dataCtrl.addGroup(input.group, input.type);
+      newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
+      //console.log(newGroup, newItem);
+    }
+    //console.log('foo');
   };
 
   var setEvtLst = function setEventListeners() {
@@ -155,7 +206,6 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
 
   return {
     init: function init() {
-      console.log('Js rodandoooo');
       charts = createCharts(winWidth);
       setEvtLst();
     }
