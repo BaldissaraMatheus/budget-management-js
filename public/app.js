@@ -3,21 +3,21 @@
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 // Precisa importar o polyfill
+// Precisa tirar os console logs
 var dataCtrl = function dataController() {
-  var Group = function Group(name, type, total_value, items) {
+  var Group = function Group(name, type, total_value) {
     _classCallCheck(this, Group);
 
     this.name = name;
     this.type = type;
     this.total_value = total_value;
-    this.items = items;
+    this.items = [];
   };
 
-  var Item = function Item(id, group, desc, value, date) {
+  var Item = function Item(id, desc, value, date) {
     _classCallCheck(this, Item);
 
     this.id = id;
-    this.group = group;
     this.desc = desc;
     this.value = value;
     this.date = date;
@@ -34,8 +34,6 @@ var dataCtrl = function dataController() {
   // Add new item to database
   // Calculate budget
   return {
-
-    // Fazer isso aqui funcionar, acho q precisa de polyfill
     addGroup: function addGroup(group, type) {
       var pos = void 0;
 
@@ -62,17 +60,20 @@ var dataCtrl = function dataController() {
     addItem: function addItem(group, type, desc, val) {
       var newItem = void 0;
       var id = 0;
-      var date = new Date();
+      var date = moment().format("DD/MM/YYYY");
 
-      // Usar o metodo find pra achar o grupo que tenha o nome como group
-      /*
-      if (data.groups[group].length > 0){
-        id = data.groups[group][data.groups[group].length - 1].id + 1;
-      }    
-      */
+      var pos = data.groups.findIndex(function (obj, index) {
+        return obj.name === group;
+      });
 
-      newItem = new Item(id, group, desc, val, date);
-      // data.groups[group].push(newItem);
+      if (data.groups[pos].items.length > 0) {
+        id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
+      }
+
+      newItem = new Item(id, desc, val, date);
+      data.groups[pos].items.push(newItem);
+
+      console.log(data.groups[pos].items);
 
       return newItem;
     }

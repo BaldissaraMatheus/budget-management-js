@@ -1,19 +1,19 @@
 // Precisa importar o polyfill
+// Precisa tirar os console logs
 const dataCtrl = (function dataController() {
 
   class Group {
-    constructor(name, type, total_value, items) {
+    constructor(name, type, total_value) {
       this.name = name;
       this.type = type;
       this.total_value = total_value;
-      this.items = items;
+      this.items = [];
     }
   }
 
   class Item {
-    constructor(id, group, desc, value, date) {
+    constructor(id, desc, value, date) {
       this.id = id;
-      this.group = group;
       this.desc = desc;
       this.value = value;
       this.date = date;
@@ -31,8 +31,6 @@ const dataCtrl = (function dataController() {
   // Add new item to database
   // Calculate budget
   return {
-
-    // Fazer isso aqui funcionar, acho q precisa de polyfill
     addGroup: (group, type) => {
       let pos;
 
@@ -58,17 +56,18 @@ const dataCtrl = (function dataController() {
     addItem: (group, type, desc, val) => {
       let newItem;
       let id = 0;
-      const date = new Date();
+      const date = moment().format("DD/MM/YYYY");
+      
+      const pos = data.groups.findIndex((obj, index) => (obj.name === group));
 
-      // Usar o metodo find pra achar o grupo que tenha o nome como group
-      /*
-      if (data.groups[group].length > 0){
-        id = data.groups[group][data.groups[group].length - 1].id + 1;
-      }    
-      */
+      if (data.groups[pos].items.length > 0){
+        id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
+      }
 
-      newItem = new Item(id, group, desc, val, date);
-     // data.groups[group].push(newItem);
+      newItem = new Item(id, desc, val, date);
+      data.groups[pos].items.push(newItem);
+
+      console.log(data.groups[pos].items);
 
       return newItem;
     }
