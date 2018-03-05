@@ -49,7 +49,7 @@ const dataCtrl = (function dataController() {
 
       } else {
         console.log(`Grupo foi encontrado na posicao ${pos}`);
-        return data.groups[pos];     
+        return false;     
       }
     },
 
@@ -85,7 +85,14 @@ const UICtrl = (function UIController() {
     inputValue: '#value',
     selectGroup: '#group',
     inputDesc: '#desc',
-    selectType: '#type'
+    selectType: '#type',
+    container: '#cards-container'
+  };
+
+  const groupNames = {
+    sal: 'Salário',
+    food: 'Comida',
+    ent: 'Entreterimento'
   };
 
   return {
@@ -175,18 +182,43 @@ const UICtrl = (function UIController() {
       return charts;
     },
 
+    addItemUI: function(group, mobileDevice) {
+      const DOMelement = DOMstrings.container;
+      let elClass;
+      let html;
+      if(group) {
+        if (mobileDevice === true) {
+          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+        } else {
+          if (group.type === 'inc') {       
+            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+          } else {  
+            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+          }
+        }
+  
+        html = html.replace('$TYPE', group.type);
+        html = html.replace('$NAME', groupNames[group.name]);
+        html = html.replace('$VALUE', group.total_value);
+        
+        document.querySelector(DOMelement).insertAdjacentHTML('beforeend', html);
+      }
+
+    },
   };
+
 }());
 
 const mainCtrl = (function generalController(dataCtrl, UICtrl) {
   let winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  let mobileDevice;
   let charts;
 
   if (winWidth < 768) {
-    let mobileDevice = true;
+    mobileDevice = true;
 
   } else {
-    let mobileDevice = false;
+    mobileDevice = false;
   }
 
   const createCharts = function createAndGetChartsFromTheUIController(winWidth) {
@@ -202,7 +234,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
       if (input.desc === '') input.desc = 'Sem descrição';        
       newGroup = dataCtrl.addGroup(input.group, input.type);
       newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
-      //console.log(newGroup, newItem);
+      UICtrl.addItemUI(newGroup, mobileDevice);
     }
     //console.log('foo');
   };

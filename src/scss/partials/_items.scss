@@ -12,23 +12,23 @@
 .card {
   padding: 0;
   margin: 15px 0 15px 0;
-  width: 100%;
   display: block;
   overflow: auto;
-  @media screen and (min-width: 768px) {
-    width: 49%;
-  }
+  zoom: 1;
 }
 
-.inc {
+.inc-container {
   float: right;
+  width: 49%;
 }
 
-.exp {
-  float: right;
-  @media screen and (min-width: 768px) {
-    float: left;
-  }
+.exp-container {
+  float: left;
+  width: 49%;
+}
+
+.mobile {
+  width: 100%;
 }
 
 .card__pic {

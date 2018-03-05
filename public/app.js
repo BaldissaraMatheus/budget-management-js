@@ -53,7 +53,7 @@ var dataCtrl = function dataController() {
         return newGroup;
       } else {
         console.log('Grupo foi encontrado na posicao ' + pos);
-        return data.groups[pos];
+        return false;
       }
     },
 
@@ -91,7 +91,14 @@ var UICtrl = function UIController() {
     inputValue: '#value',
     selectGroup: '#group',
     inputDesc: '#desc',
-    selectType: '#type'
+    selectType: '#type',
+    container: '#cards-container'
+  };
+
+  var groupNames = {
+    sal: 'Salário',
+    food: 'Comida',
+    ent: 'Entreterimento'
   };
 
   return {
@@ -162,19 +169,42 @@ var UICtrl = function UIController() {
 
       var charts = [chartGnrl, chartExp, chartInc];
       return charts;
-    }
+    },
 
+    addItemUI: function addItemUI(group, mobileDevice) {
+      var DOMelement = DOMstrings.container;
+      var elClass = void 0;
+      var html = void 0;
+      if (group) {
+        if (mobileDevice === true) {
+          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+        } else {
+          if (group.type === 'inc') {
+            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+          } else {
+            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+          }
+        }
+
+        html = html.replace('$TYPE', group.type);
+        html = html.replace('$NAME', groupNames[group.name]);
+        html = html.replace('$VALUE', group.total_value);
+
+        document.querySelector(DOMelement).insertAdjacentHTML('beforeend', html);
+      }
+    }
   };
 }();
 
 var mainCtrl = function generalController(dataCtrl, UICtrl) {
   var winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  var mobileDevice = void 0;
   var charts = void 0;
 
   if (winWidth < 768) {
-    var mobileDevice = true;
+    mobileDevice = true;
   } else {
-    var _mobileDevice = false;
+    mobileDevice = false;
   }
 
   var createCharts = function createAndGetChartsFromTheUIController(winWidth) {
@@ -190,7 +220,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       if (input.desc === '') input.desc = 'Sem descrição';
       newGroup = dataCtrl.addGroup(input.group, input.type);
       newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
-      //console.log(newGroup, newItem);
+      UICtrl.addItemUI(newGroup, mobileDevice);
     }
     //console.log('foo');
   };
