@@ -35,16 +35,16 @@ const dataCtrl = (function dataController() {
       let pos;
 
       if (data.groups.length != 0) {
-        console.log('data.groups não está vazio');
+        //console.log('data.groups não está vazio');
         pos = data.groups.findIndex((obj, index) => (obj.name === group));
-        console.log(`pos = ${pos}`);
+        //console.log(`pos = ${pos}`);
       }
 
       if (pos < 0 || pos === undefined) {
-        console.log(`Não encontrou esse grupo, então será criado um novo gupo para ${group}`);
+        //console.log(`Não encontrou esse grupo, então será criado um novo gupo para ${group}`);
         const newGroup = new Group(group, type, 0);
         data.groups.push(newGroup);
-        console.log(newGroup);
+        //console.log(newGroup);
         return newGroup;
 
       } else {
@@ -67,7 +67,7 @@ const dataCtrl = (function dataController() {
       newItem = new Item(id, desc, val, date);
       data.groups[pos].items.push(newItem);
 
-      console.log(data.groups[pos].items);
+      //console.log(data.groups[pos].items);
 
       return newItem;
     }
@@ -182,31 +182,56 @@ const UICtrl = (function UIController() {
       return charts;
     },
 
-    addItemUI: function(group, mobileDevice) {
-      const DOMelement = DOMstrings.container;
+    addGroupUI: function(group, mobileDevice) {
+      const container = DOMstrings.container;
       let elClass;
       let html;
       if(group) {
         if (mobileDevice === true) {
-          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
           if (group.type === 'inc') {       
-            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           } else {  
-            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           }
         }
   
         html = html.replace('$TYPE', group.type);
         html = html.replace('$NAME', groupNames[group.name]);
         html = html.replace('$VALUE', group.total_value);
+
+        if (html.includes('$LISTCLASS')) {
+          html = html.replace('$LISTCLASS', group.name);
+        }
         
-        document.querySelector(DOMelement).insertAdjacentHTML('beforeend', html);
+        document.querySelector(container).insertAdjacentHTML('beforeend', html);
+      }
+    },
+
+    addItemUI: function(item, group, type) {
+      const container = `.${group}`;
+      //console.log(container);
+      let html;
+      let sign;
+
+      if (type === 'inc') {
+        sign = '+';
+      } else {
+        sign = '-';
       }
 
-    },
-  };
+      html = "<li class='card__list__item'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6></div></li>";
 
+      html = html.replace('$DESC', item.desc);
+      html = html.replace('$VALUE', item.value);
+      html = html.replace('$SIGN', sign);
+      html = html.replace('$DATE', item.date);
+      
+      document.querySelector(container).insertAdjacentHTML('beforeend', html);
+    },
+
+  };
 }());
 
 const mainCtrl = (function generalController(dataCtrl, UICtrl) {
@@ -226,7 +251,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     return charts;
   };
 
-  const foo = function() {
+  const ctrlAddItem = function addGroupAndItemToTheDataStructureAndUI() {
     const input = UICtrl.getInput();
     let newItem;
     let newGroup;
@@ -234,15 +259,14 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
       if (input.desc === '') input.desc = 'Sem descrição';        
       newGroup = dataCtrl.addGroup(input.group, input.type);
       newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
-      UICtrl.addItemUI(newGroup, mobileDevice);
+      UICtrl.addGroupUI(newGroup, mobileDevice);
+      UICtrl.addItemUI(newItem, input.group, input.type);
     }
-    //console.log('foo');
   };
 
   const setEvtLst = function setEventListeners() {
     const DOMobj = UICtrl.getDOMstrings();
-    document.querySelector(DOMobj.addBtn).addEventListener('click', foo);
-  
+    document.querySelector(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
   };
 
   return {

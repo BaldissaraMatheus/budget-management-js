@@ -38,18 +38,18 @@ var dataCtrl = function dataController() {
       var pos = void 0;
 
       if (data.groups.length != 0) {
-        console.log('data.groups não está vazio');
+        //console.log('data.groups não está vazio');
         pos = data.groups.findIndex(function (obj, index) {
           return obj.name === group;
         });
-        console.log('pos = ' + pos);
+        //console.log(`pos = ${pos}`);
       }
 
       if (pos < 0 || pos === undefined) {
-        console.log('N\xE3o encontrou esse grupo, ent\xE3o ser\xE1 criado um novo gupo para ' + group);
+        //console.log(`Não encontrou esse grupo, então será criado um novo gupo para ${group}`);
         var newGroup = new Group(group, type, 0);
         data.groups.push(newGroup);
-        console.log(newGroup);
+        //console.log(newGroup);
         return newGroup;
       } else {
         console.log('Grupo foi encontrado na posicao ' + pos);
@@ -73,7 +73,7 @@ var dataCtrl = function dataController() {
       newItem = new Item(id, desc, val, date);
       data.groups[pos].items.push(newItem);
 
-      console.log(data.groups[pos].items);
+      //console.log(data.groups[pos].items);
 
       return newItem;
     }
@@ -171,18 +171,18 @@ var UICtrl = function UIController() {
       return charts;
     },
 
-    addItemUI: function addItemUI(group, mobileDevice) {
-      var DOMelement = DOMstrings.container;
+    addGroupUI: function addGroupUI(group, mobileDevice) {
+      var container = DOMstrings.container;
       var elClass = void 0;
       var html = void 0;
       if (group) {
         if (mobileDevice === true) {
-          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
           if (group.type === 'inc') {
-            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           } else {
-            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list'></ul></div>";
+            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           }
         }
 
@@ -190,9 +190,36 @@ var UICtrl = function UIController() {
         html = html.replace('$NAME', groupNames[group.name]);
         html = html.replace('$VALUE', group.total_value);
 
-        document.querySelector(DOMelement).insertAdjacentHTML('beforeend', html);
+        if (html.includes('$LISTCLASS')) {
+          html = html.replace('$LISTCLASS', group.name);
+        }
+
+        document.querySelector(container).insertAdjacentHTML('beforeend', html);
       }
+    },
+
+    addItemUI: function addItemUI(item, group, type) {
+      var container = '.' + group;
+      //console.log(container);
+      var html = void 0;
+      var sign = void 0;
+
+      if (type === 'inc') {
+        sign = '+';
+      } else {
+        sign = '-';
+      }
+
+      html = "<li class='card__list__item'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6></div></li>";
+
+      html = html.replace('$DESC', item.desc);
+      html = html.replace('$VALUE', item.value);
+      html = html.replace('$SIGN', sign);
+      html = html.replace('$DATE', item.date);
+
+      document.querySelector(container).insertAdjacentHTML('beforeend', html);
     }
+
   };
 }();
 
@@ -212,7 +239,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     return charts;
   };
 
-  var foo = function foo() {
+  var ctrlAddItem = function addGroupAndItemToTheDataStructureAndUI() {
     var input = UICtrl.getInput();
     var newItem = void 0;
     var newGroup = void 0;
@@ -220,14 +247,14 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       if (input.desc === '') input.desc = 'Sem descrição';
       newGroup = dataCtrl.addGroup(input.group, input.type);
       newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
-      UICtrl.addItemUI(newGroup, mobileDevice);
+      UICtrl.addGroupUI(newGroup, mobileDevice);
+      UICtrl.addItemUI(newItem, input.group, input.type);
     }
-    //console.log('foo');
   };
 
   var setEvtLst = function setEventListeners() {
     var DOMobj = UICtrl.getDOMstrings();
-    document.querySelector(DOMobj.addBtn).addEventListener('click', foo);
+    document.querySelector(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
   };
 
   return {
