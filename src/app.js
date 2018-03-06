@@ -49,7 +49,7 @@ const dataCtrl = (function dataController() {
 
       } else {
         console.log(`Grupo foi encontrado na posicao ${pos}`);
-        return false;     
+        return data.groups[pos];     
       }
     },
 
@@ -70,7 +70,21 @@ const dataCtrl = (function dataController() {
       //console.log(data.groups[pos].items);
 
       return newItem;
+    },
+
+    updateTotals: (item, type) => {
+      if (type === 'inc') {
+        data.totals.inc += item.value;
+      } else {
+        data.totals.exp += item.value;
+      }
+    },
+
+    updateGroupValue: (group, item) => {
+      group.total_value += item.value;
+      return group.total_value;
     }
+
   };
 }());
 
@@ -182,21 +196,22 @@ const UICtrl = (function UIController() {
       return charts;
     },
 
-    addGroupUI: function(group, mobileDevice) {
+    addGroupUI: (group, mobileDevice) => {
       const container = DOMstrings.container;
       let elClass;
       let html;
-      if(group) {
+      if(!document.getElementById(group.name)) {
         if (mobileDevice === true) {
-          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
           if (group.type === 'inc') {       
-            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           } else {  
-            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           }
         }
-  
+        
+        html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
         html = html.replace('$NAME', groupNames[group.name]);
         html = html.replace('$VALUE', group.total_value);
@@ -209,13 +224,12 @@ const UICtrl = (function UIController() {
       }
     },
 
-    addItemUI: function(item, group, type) {
-      const container = `.${group}`;
-      //console.log(container);
+    addItemUI: (item, group) => {
+      const container = `.${group.name}`;
       let html;
       let sign;
 
-      if (type === 'inc') {
+      if (group.type === 'inc') {
         sign = '+';
       } else {
         sign = '-';
@@ -230,6 +244,19 @@ const UICtrl = (function UIController() {
       
       document.querySelector(container).insertAdjacentHTML('beforeend', html);
     },
+
+    updateGroupValueUI: (group) => {
+      let value = document.getElementById(group.name).getElementsByClassName('data__value')[0];
+      let sign;
+
+      if (group.type === 'inc') {
+        sign = '+';
+      } else {
+        sign = '-';
+      }
+
+      value.innerHTML = `${sign}R$${group.total_value}`;
+    }
 
   };
 }());
@@ -260,17 +287,23 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
       newGroup = dataCtrl.addGroup(input.group, input.type);
       newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
       UICtrl.addGroupUI(newGroup, mobileDevice);
-      UICtrl.addItemUI(newItem, input.group, input.type);
+      UICtrl.addItemUI(newItem, newGroup);
+      dataCtrl.updateGroupValue(newGroup, newItem);
+      UICtrl.updateGroupValueUI(newGroup);
+      dataCtrl.updateTotals(newItem, input.type);
     }
   };
 
   const setEvtLst = function setEventListeners() {
     const DOMobj = UICtrl.getDOMstrings();
     document.querySelector(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
+    document.addEventListener('keypress', (event) => {
+      if (event.keycode === 13 || event.which === 13) ctrlAddItem();                   
+    });
   };
 
   return {
-    init: function() {
+    init: () => {
       charts = createCharts(winWidth);
       setEvtLst();
     }

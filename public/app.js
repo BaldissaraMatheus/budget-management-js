@@ -53,7 +53,7 @@ var dataCtrl = function dataController() {
         return newGroup;
       } else {
         console.log('Grupo foi encontrado na posicao ' + pos);
-        return false;
+        return data.groups[pos];
       }
     },
 
@@ -76,7 +76,21 @@ var dataCtrl = function dataController() {
       //console.log(data.groups[pos].items);
 
       return newItem;
+    },
+
+    updateTotals: function updateTotals(item, type) {
+      if (type === 'inc') {
+        data.totals.inc += item.value;
+      } else {
+        data.totals.exp += item.value;
+      }
+    },
+
+    updateGroupValue: function updateGroupValue(group, item) {
+      group.total_value += item.value;
+      return group.total_value;
     }
+
   };
 }();
 
@@ -175,17 +189,18 @@ var UICtrl = function UIController() {
       var container = DOMstrings.container;
       var elClass = void 0;
       var html = void 0;
-      if (group) {
+      if (!document.getElementById(group.name)) {
         if (mobileDevice === true) {
-          html = "<div class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
           if (group.type === 'inc') {
-            html = "<div class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           } else {
-            html = "<div class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           }
         }
 
+        html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
         html = html.replace('$NAME', groupNames[group.name]);
         html = html.replace('$VALUE', group.total_value);
@@ -198,13 +213,12 @@ var UICtrl = function UIController() {
       }
     },
 
-    addItemUI: function addItemUI(item, group, type) {
-      var container = '.' + group;
-      //console.log(container);
+    addItemUI: function addItemUI(item, group) {
+      var container = '.' + group.name;
       var html = void 0;
       var sign = void 0;
 
-      if (type === 'inc') {
+      if (group.type === 'inc') {
         sign = '+';
       } else {
         sign = '-';
@@ -218,6 +232,19 @@ var UICtrl = function UIController() {
       html = html.replace('$DATE', item.date);
 
       document.querySelector(container).insertAdjacentHTML('beforeend', html);
+    },
+
+    updateGroupValueUI: function updateGroupValueUI(group) {
+      var value = document.getElementById(group.name).getElementsByClassName('data__value')[0];
+      var sign = void 0;
+
+      if (group.type === 'inc') {
+        sign = '+';
+      } else {
+        sign = '-';
+      }
+
+      value.innerHTML = sign + 'R$' + group.total_value;
     }
 
   };
@@ -248,13 +275,19 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       newGroup = dataCtrl.addGroup(input.group, input.type);
       newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
       UICtrl.addGroupUI(newGroup, mobileDevice);
-      UICtrl.addItemUI(newItem, input.group, input.type);
+      UICtrl.addItemUI(newItem, newGroup);
+      dataCtrl.updateGroupValue(newGroup, newItem);
+      UICtrl.updateGroupValueUI(newGroup);
+      dataCtrl.updateTotals(newItem, input.type);
     }
   };
 
   var setEvtLst = function setEventListeners() {
     var DOMobj = UICtrl.getDOMstrings();
     document.querySelector(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
+    document.addEventListener('keypress', function (event) {
+      if (event.keycode === 13 || event.which === 13) ctrlAddItem();
+    });
   };
 
   return {
