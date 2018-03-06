@@ -31,28 +31,38 @@ var dataCtrl = function dataController() {
     }
   };
 
+  var options = {
+    exp: {
+      names: ['Comida', 'Saúde', 'Serviços', 'Transporte', 'Entreterimento', 'Produtos Essenciais', 'Produtos Diversos', 'Impostos', 'Empréstimos', 'Investimentos', 'Outros'],
+      values: ['food', 'health', 'serv_exp', 'trasp', 'ent', 'prod_ess', 'prod_misc', 'tax', 'loan', 'inv_exp', 'others_exp']
+    },
+    inc: {
+      names: ['Salário', 'Vendas', 'Serviços', 'Investimentos', 'Outros'],
+      values: ['sal', 'sales', 'serv_inc', 'inv_inc', 'others_inc']
+    }
+  };
+
   // Add new item to database
   // Calculate budget
   return {
-    addGroup: function addGroup(group, type) {
+    getOptions: function getOptions() {
+      return options;
+    },
+
+    addGroup: function addGroup(groupName, type) {
       var pos = void 0;
 
       if (data.groups.length != 0) {
-        //console.log('data.groups não está vazio');
         pos = data.groups.findIndex(function (obj, index) {
-          return obj.name === group;
+          return obj.name === groupName;
         });
-        //console.log(`pos = ${pos}`);
       }
 
       if (pos < 0 || pos === undefined) {
-        //console.log(`Não encontrou esse grupo, então será criado um novo gupo para ${group}`);
-        var newGroup = new Group(group, type, 0);
+        var newGroup = new Group(groupName, type, 0);
         data.groups.push(newGroup);
-        //console.log(newGroup);
         return newGroup;
       } else {
-        console.log('Grupo foi encontrado na posicao ' + pos);
         return data.groups[pos];
       }
     },
@@ -72,8 +82,6 @@ var dataCtrl = function dataController() {
 
       newItem = new Item(id, desc, val, date);
       data.groups[pos].items.push(newItem);
-
-      //console.log(data.groups[pos].items);
 
       return newItem;
     },
@@ -96,10 +104,6 @@ var dataCtrl = function dataController() {
 
 var UICtrl = function UIController() {
 
-  // Get input values
-  // add new item to UI
-  // Update budget on UI
-
   var DOMstrings = {
     addBtn: '#add-btn',
     inputValue: '#value',
@@ -109,12 +113,6 @@ var UICtrl = function UIController() {
     container: '#cards-container'
   };
 
-  var groupNames = {
-    sal: 'Salário',
-    food: 'Comida',
-    ent: 'Entreterimento'
-  };
-
   return {
     getDOMstrings: function getDOMstrings() {
       return DOMstrings;
@@ -122,11 +120,18 @@ var UICtrl = function UIController() {
 
     getInput: function getInput() {
       return {
-        group: document.querySelector(DOMstrings.selectGroup).value,
+        groupName: document.querySelector(DOMstrings.selectGroup).value,
+        selectOptionIntex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
         desc: document.querySelector(DOMstrings.inputDesc).value,
         type: document.querySelector(DOMstrings.selectType).value,
         value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
       };
+    },
+
+    clearFields: function clearFields() {
+      document.querySelector(DOMstrings.inputDesc).value = '';
+      document.querySelector(DOMstrings.inputValue).value = '';
+      document.querySelector(DOMstrings.selectType).selectedIndex = 0;
     },
 
     displayCharts: function displayCharts(winWidth) {
@@ -185,7 +190,7 @@ var UICtrl = function UIController() {
       return charts;
     },
 
-    addGroupUI: function addGroupUI(group, mobileDevice) {
+    addGroupUI: function addGroupUI(group, title, mobileDevice) {
       var container = DOMstrings.container;
       var elClass = void 0;
       var html = void 0;
@@ -202,7 +207,7 @@ var UICtrl = function UIController() {
 
         html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
-        html = html.replace('$NAME', groupNames[group.name]);
+        html = html.replace('$NAME', title);
         html = html.replace('$VALUE', group.total_value);
 
         if (html.includes('$LISTCLASS')) {
@@ -245,12 +250,29 @@ var UICtrl = function UIController() {
       }
 
       value.innerHTML = sign + 'R$' + group.total_value;
-    }
+    },
 
+    updateOptions: function updateOptions(options, type) {
+      var optionSelector = document.getElementById('group');
+      var names = options[type].names;
+      var values = options[type].values;
+
+      for (var i = optionSelector.options.length - 1; i >= 0; i--) {
+        optionSelector.options.remove(i);
+      }
+
+      for (var _i = 0; _i < names.length; _i++) {
+        var option = document.createElement('option');
+        option.text = names[_i];
+        option.value = values[_i];
+        optionSelector.options.add(option);
+      }
+    }
   };
 }();
 
 var mainCtrl = function generalController(dataCtrl, UICtrl) {
+  var options = dataCtrl.getOptions();
   var winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   var mobileDevice = void 0;
   var charts = void 0;
@@ -272,14 +294,20 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     var newGroup = void 0;
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';
-      newGroup = dataCtrl.addGroup(input.group, input.type);
-      newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
-      UICtrl.addGroupUI(newGroup, mobileDevice);
+      newGroup = dataCtrl.addGroup(input.groupName, input.type);
+      newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, input.value);
+      UICtrl.addGroupUI(newGroup, options[input.type].names[input.selectOptionIntex], mobileDevice);
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
-      dataCtrl.updateTotals(newItem, input.type);
+      dataCtrl.updateTotals(newItem, newGroup.type);
+      UICtrl.updateOptions(options, newGroup.type);
     }
+  };
+
+  var restartFields = function setTheDefaultValuesToFields() {
+    UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
+    UICtrl.clearFields();
   };
 
   var setEvtLst = function setEventListeners() {
@@ -288,11 +316,16 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     document.addEventListener('keypress', function (event) {
       if (event.keycode === 13 || event.which === 13) ctrlAddItem();
     });
+    document.querySelector(DOMobj.selectType).addEventListener('change', function () {
+      var input = UICtrl.getInput();
+      UICtrl.updateOptions(options, input.type);
+    });
   };
 
   return {
     init: function init() {
       charts = createCharts(winWidth);
+      restartFields();
       setEvtLst();
     }
   };

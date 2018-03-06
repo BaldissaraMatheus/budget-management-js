@@ -28,27 +28,37 @@ const dataCtrl = (function dataController() {
     }
   };
 
+  const options = {
+    exp: {
+      names: ['Comida', 'Saúde', 'Serviços', 'Transporte', 'Entreterimento', 'Produtos Essenciais', 'Produtos Diversos', 'Impostos', 'Empréstimos', 'Investimentos', 'Outros'],
+      values: ['food', 'health', 'serv_exp', 'trasp', 'ent', 'prod_ess', 'prod_misc', 'tax', 'loan', 'inv_exp', 'others_exp']
+    },
+    inc: {
+      names: ['Salário', 'Vendas', 'Serviços', 'Investimentos', 'Outros'],
+      values: ['sal', 'sales', 'serv_inc', 'inv_inc', 'others_inc']
+    }
+  };
+
   // Add new item to database
   // Calculate budget
   return {
-    addGroup: (group, type) => {
+    getOptions: () => {
+      return options;
+    },
+
+    addGroup: (groupName, type) => {
       let pos;
 
       if (data.groups.length != 0) {
-        //console.log('data.groups não está vazio');
-        pos = data.groups.findIndex((obj, index) => (obj.name === group));
-        //console.log(`pos = ${pos}`);
+        pos = data.groups.findIndex((obj, index) => (obj.name === groupName));
       }
 
       if (pos < 0 || pos === undefined) {
-        //console.log(`Não encontrou esse grupo, então será criado um novo gupo para ${group}`);
-        const newGroup = new Group(group, type, 0);
+        const newGroup = new Group(groupName, type, 0);
         data.groups.push(newGroup);
-        //console.log(newGroup);
         return newGroup;
 
       } else {
-        console.log(`Grupo foi encontrado na posicao ${pos}`);
         return data.groups[pos];     
       }
     },
@@ -66,8 +76,6 @@ const dataCtrl = (function dataController() {
 
       newItem = new Item(id, desc, val, date);
       data.groups[pos].items.push(newItem);
-
-      //console.log(data.groups[pos].items);
 
       return newItem;
     },
@@ -89,10 +97,6 @@ const dataCtrl = (function dataController() {
 }());
 
 const UICtrl = (function UIController() {
-
-  // Get input values
-  // add new item to UI
-  // Update budget on UI
   
   const DOMstrings = {
     addBtn: '#add-btn',
@@ -103,12 +107,6 @@ const UICtrl = (function UIController() {
     container: '#cards-container'
   };
 
-  const groupNames = {
-    sal: 'Salário',
-    food: 'Comida',
-    ent: 'Entreterimento'
-  };
-
   return {
     getDOMstrings: () => {
       return DOMstrings;
@@ -116,13 +114,20 @@ const UICtrl = (function UIController() {
 
     getInput: () => {
       return {
-        group: document.querySelector(DOMstrings.selectGroup).value,
+        groupName: document.querySelector(DOMstrings.selectGroup).value,
+        selectOptionIntex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
         desc: document.querySelector(DOMstrings.inputDesc).value,
         type: document.querySelector(DOMstrings.selectType).value,
         value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
       };
     },
     
+    clearFields: () => {
+      document.querySelector(DOMstrings.inputDesc).value = '';
+      document.querySelector(DOMstrings.inputValue).value = '';
+      document.querySelector(DOMstrings.selectType).selectedIndex = 0;
+    },
+
     displayCharts: (winWidth) => {
       let chartGnrlEl = document.getElementById('chart--general').getContext('2d');
       let chartExpEl = document.getElementById('chart--exp').getContext('2d');
@@ -196,7 +201,7 @@ const UICtrl = (function UIController() {
       return charts;
     },
 
-    addGroupUI: (group, mobileDevice) => {
+    addGroupUI: (group, title, mobileDevice) => {
       const container = DOMstrings.container;
       let elClass;
       let html;
@@ -213,7 +218,7 @@ const UICtrl = (function UIController() {
         
         html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
-        html = html.replace('$NAME', groupNames[group.name]);
+        html = html.replace('$NAME', title);
         html = html.replace('$VALUE', group.total_value);
 
         if (html.includes('$LISTCLASS')) {
@@ -256,12 +261,29 @@ const UICtrl = (function UIController() {
       }
 
       value.innerHTML = `${sign}R$${group.total_value}`;
-    }
+    },
 
+    updateOptions: (options, type) => {
+      const optionSelector = document.getElementById('group');
+      const names = options[type].names;
+      const values = options[type].values;
+
+      for (let i = optionSelector.options.length-1; i >= 0; i--) {
+        optionSelector.options.remove(i);
+      }
+
+      for (let i = 0; i < names.length; i++) {
+        let option = document.createElement('option');  
+        option.text = names[i];
+        option.value = values[i];
+        optionSelector.options.add(option);
+      }
+    }
   };
 }());
 
 const mainCtrl = (function generalController(dataCtrl, UICtrl) {
+  const options = dataCtrl.getOptions();
   let winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   let mobileDevice;
   let charts;
@@ -284,14 +306,20 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     let newGroup;
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';        
-      newGroup = dataCtrl.addGroup(input.group, input.type);
-      newItem = dataCtrl.addItem(input.group, input.type, input.desc, input.value);
-      UICtrl.addGroupUI(newGroup, mobileDevice);
+      newGroup = dataCtrl.addGroup(input.groupName, input.type);
+      newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, input.value);
+      UICtrl.addGroupUI(newGroup, options[input.type].names[input.selectOptionIntex], mobileDevice);
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
-      dataCtrl.updateTotals(newItem, input.type);
+      dataCtrl.updateTotals(newItem, newGroup.type);
+      UICtrl.updateOptions(options, newGroup.type);
     }
+  };
+
+  const restartFields = function setTheDefaultValuesToFields() {
+    UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
+    UICtrl.clearFields();
   };
 
   const setEvtLst = function setEventListeners() {
@@ -300,11 +328,16 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     document.addEventListener('keypress', (event) => {
       if (event.keycode === 13 || event.which === 13) ctrlAddItem();                   
     });
+    document.querySelector(DOMobj.selectType).addEventListener('change', () => {
+      const input = UICtrl.getInput();
+      UICtrl.updateOptions(options, input.type);
+    });
   };
 
   return {
     init: () => {
       charts = createCharts(winWidth);
+      restartFields();
       setEvtLst();
     }
   };
