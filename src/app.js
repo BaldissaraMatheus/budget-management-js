@@ -3,9 +3,10 @@
 const dataCtrl = (function dataController() {
 
   class Group {
-    constructor(name, type, total_value) {
+    constructor(name, type, text, total_value) {
       this.name = name;
       this.type = type;
+      this.text = text;
       this.total_value = total_value;
       this.items = [];
     }
@@ -44,15 +45,15 @@ const dataCtrl = (function dataController() {
       return options;
     },
 
-    addGroup: (groupName, type) => {
+    addGroup: (name, type, text) => {
       let pos;
 
       if (data.groups.length != 0) {
-        pos = data.groups.findIndex((obj, index) => (obj.name === groupName));
+        pos = data.groups.findIndex((obj, index) => (obj.name === name));
       }
 
       if (pos < 0 || pos === undefined) {
-        const newGroup = new Group(groupName, type, 0);
+        const newGroup = new Group(name, type, text, 0);
         data.groups.push(newGroup);
         return newGroup;
 
@@ -202,7 +203,7 @@ const UICtrl = (function UIController() {
       return charts;
     },
 
-    addGroupUI: (group, title, mobileDevice) => {
+    addGroupUI: (group, mobileDevice) => {
       const container = DOMstrings.container;
       let elClass;
       let html;
@@ -219,7 +220,7 @@ const UICtrl = (function UIController() {
         
         html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
-        html = html.replace('$NAME', title);
+        html = html.replace('$NAME', group.text);
         html = html.replace('$VALUE', group.total_value);
 
         if (html.includes('$LISTCLASS')) {
@@ -298,7 +299,7 @@ const UICtrl = (function UIController() {
         charts[i].data.datasets[0].data[index] += newItem.value;
       
       } else {
-        charts[i].data.labels.push(newGroup.name);
+        charts[i].data.labels.push(newGroup.text);
         charts[i].data.datasets[0].data.push(newItem.value);
       }
 
@@ -323,7 +324,7 @@ const UICtrl = (function UIController() {
       expContainer.innerHTML = `R$${exp}`;
       incContainer.innerHTML = `R$${inc}`;
       budgetContainer.innerHTML = `R$${inc - exp}`;
-      expPercent.innerHTML = `${percent}% do saldo gasto`
+      expPercent.innerHTML = `${percent}% do saldo gasto`;
     },
   };
 }());
@@ -353,9 +354,9 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     let newGroup;
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';        
-      newGroup = dataCtrl.addGroup(input.groupName, input.type);
+      newGroup = dataCtrl.addGroup(input.groupName, input.type, options[input.type].names[input.selectOptionIntex]);
       newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, input.value);
-      UICtrl.addGroupUI(newGroup, options[input.type].names[input.selectOptionIntex], mobileDevice);
+      UICtrl.addGroupUI(newGroup, mobileDevice);
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);

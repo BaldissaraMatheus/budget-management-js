@@ -5,11 +5,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // Precisa importar o polyfill
 // Precisa tirar os console logs
 var dataCtrl = function dataController() {
-  var Group = function Group(name, type, total_value) {
+  var Group = function Group(name, type, text, total_value) {
     _classCallCheck(this, Group);
 
     this.name = name;
     this.type = type;
+    this.text = text;
     this.total_value = total_value;
     this.items = [];
   };
@@ -47,17 +48,17 @@ var dataCtrl = function dataController() {
       return options;
     },
 
-    addGroup: function addGroup(groupName, type) {
+    addGroup: function addGroup(name, type, text) {
       var pos = void 0;
 
       if (data.groups.length != 0) {
         pos = data.groups.findIndex(function (obj, index) {
-          return obj.name === groupName;
+          return obj.name === name;
         });
       }
 
       if (pos < 0 || pos === undefined) {
-        var newGroup = new Group(groupName, type, 0);
+        var newGroup = new Group(name, type, text, 0);
         data.groups.push(newGroup);
         return newGroup;
       } else {
@@ -184,7 +185,7 @@ var UICtrl = function UIController() {
       return charts;
     },
 
-    addGroupUI: function addGroupUI(group, title, mobileDevice) {
+    addGroupUI: function addGroupUI(group, mobileDevice) {
       var container = DOMstrings.container;
       var elClass = void 0;
       var html = void 0;
@@ -201,7 +202,7 @@ var UICtrl = function UIController() {
 
         html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
-        html = html.replace('$NAME', title);
+        html = html.replace('$NAME', group.text);
         html = html.replace('$VALUE', group.total_value);
 
         if (html.includes('$LISTCLASS')) {
@@ -281,7 +282,7 @@ var UICtrl = function UIController() {
       if (index !== -1) {
         charts[i].data.datasets[0].data[index] += newItem.value;
       } else {
-        charts[i].data.labels.push(newGroup.name);
+        charts[i].data.labels.push(newGroup.text);
         charts[i].data.datasets[0].data.push(newItem.value);
       }
 
@@ -335,9 +336,9 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     var newGroup = void 0;
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';
-      newGroup = dataCtrl.addGroup(input.groupName, input.type);
+      newGroup = dataCtrl.addGroup(input.groupName, input.type, options[input.type].names[input.selectOptionIntex]);
       newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, input.value);
-      UICtrl.addGroupUI(newGroup, options[input.type].names[input.selectOptionIntex], mobileDevice);
+      UICtrl.addGroupUI(newGroup, mobileDevice);
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
