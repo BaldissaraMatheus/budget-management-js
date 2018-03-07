@@ -42,8 +42,6 @@ var dataCtrl = function dataController() {
     }
   };
 
-  // Add new item to database
-  // Calculate budget
   return {
     getOptions: function getOptions() {
       return options;
@@ -86,19 +84,15 @@ var dataCtrl = function dataController() {
       return newItem;
     },
 
-    updateTotals: function updateTotals(item, type) {
-      if (type === 'inc') {
-        data.totals.inc += item.value;
-      } else {
-        data.totals.exp += item.value;
-      }
-    },
-
     updateGroupValue: function updateGroupValue(group, item) {
       group.total_value += item.value;
       return group.total_value;
-    }
+    },
 
+    updateTotals: function updateTotals(item, type) {
+      data.totals[type] += item.value;
+      return data.totals;
+    }
   };
 }();
 
@@ -138,8 +132,8 @@ var UICtrl = function UIController() {
       var chartGnrlEl = document.getElementById('chart--general').getContext('2d');
       var chartExpEl = document.getElementById('chart--exp').getContext('2d');
       var chartIncEl = document.getElementById('chart--inc').getContext('2d');
-      var green = '#50CC80';
-      var red = '#F8545F';
+      var green = ['#50CC80', '#4E9CBA', '#B0EF5E', '#76BAD4', '#6260C7'];
+      var red = ['#F8545F', '#FFAA56', '#E42E3B', '#FFD856', '#BA121E', '#EA8C30', '#FA7781', '#FFE079', '#FFBC79', '#EABF30', '#FFD2A5'];
 
       var legDisplay = true;
 
@@ -155,21 +149,9 @@ var UICtrl = function UIController() {
         data: {
           labels: ['Rendas', 'Despesas'],
           datasets: [{
-            data: [50, 27],
+            data: [0, 0],
 
-            backgroundColor: [green, red]
-          }]
-        }
-      });
-
-      var chartExp = new Chart(chartExpEl, {
-        type: 'pie',
-        data: {
-          labels: ['Entreterimento', 'Transporte', 'Comida'],
-          datasets: [{
-            data: [1, 2, 3],
-
-            backgroundColor: [green, red]
+            backgroundColor: [green[0], red[0]]
           }]
         }
       });
@@ -177,16 +159,28 @@ var UICtrl = function UIController() {
       var chartInc = new Chart(chartIncEl, {
         type: 'pie',
         data: {
-          labels: ['Salário'],
+          labels: [],
           datasets: [{
-            data: [100],
+            data: [],
 
-            backgroundColor: [green]
+            backgroundColor: [green[0], green[1], green[2], green[3], green[4]]
           }]
         }
       });
 
-      var charts = [chartGnrl, chartExp, chartInc];
+      var chartExp = new Chart(chartExpEl, {
+        type: 'pie',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+
+            backgroundColor: [red[0], red[1], red[2], red[3], red[4], red[5], red[6], red[7], red[8], red[9], red[10]]
+          }]
+        }
+      });
+
+      var charts = [chartGnrl, chartInc, chartExp];
       return charts;
     },
 
@@ -267,6 +261,52 @@ var UICtrl = function UIController() {
         option.value = values[_i];
         optionSelector.options.add(option);
       }
+    },
+
+    updateCharts: function updateCharts(charts, newItem, newGroup) {
+      var i = void 0;
+
+      if (newGroup.type === 'inc') {
+        i = 1;
+      } else {
+        i = 2;
+      }
+
+      charts[0].data.datasets[0].data[i - 1] += newItem.value;
+
+      var index = charts[i].data.labels.findIndex(function (el, index) {
+        return el === newGroup.name;
+      });
+
+      if (index !== -1) {
+        charts[i].data.datasets[0].data[index] += newItem.value;
+      } else {
+        charts[i].data.labels.push(newGroup.name);
+        charts[i].data.datasets[0].data.push(newItem.value);
+      }
+
+      charts.forEach(function (el) {
+        el.update();
+      });
+    },
+
+    updateBudget: function updateBudget(inc, exp) {
+      var budgetContainer = document.getElementById('display-budget');
+      var expContainer = document.getElementById('display-exp');
+      var incContainer = document.getElementById('display-inc');
+      var expPercent = document.getElementById('display-percent');
+      var percent = void 0;
+
+      if (inc !== 0) {
+        percent = Math.round(exp / inc * 100);
+      } else {
+        percent = 0;
+      }
+
+      expContainer.innerHTML = 'R$' + exp;
+      incContainer.innerHTML = 'R$' + inc;
+      budgetContainer.innerHTML = 'R$' + (inc - exp);
+      expPercent.innerHTML = percent + '% do saldo gasto';
     }
   };
 }();
@@ -290,6 +330,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
 
   var ctrlAddItem = function addGroupAndItemToTheDataStructureAndUI() {
     var input = UICtrl.getInput();
+    var totals = void 0;
     var newItem = void 0;
     var newGroup = void 0;
     if (!isNaN(input.value)) {
@@ -300,14 +341,17 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
-      dataCtrl.updateTotals(newItem, newGroup.type);
       UICtrl.updateOptions(options, newGroup.type);
+      totals = dataCtrl.updateTotals(newItem, newGroup.type);
+      UICtrl.updateCharts(charts, newItem, newGroup);
+      UICtrl.updateBudget(totals.inc, totals.exp);
     }
   };
 
   var restartFields = function setTheDefaultValuesToFields() {
     UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
     UICtrl.clearFields();
+    UICtrl.updateBudget(0, 0);
   };
 
   var setEvtLst = function setEventListeners() {

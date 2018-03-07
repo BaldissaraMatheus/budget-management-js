@@ -39,8 +39,6 @@ const dataCtrl = (function dataController() {
     }
   };
 
-  // Add new item to database
-  // Calculate budget
   return {
     getOptions: () => {
       return options;
@@ -80,19 +78,15 @@ const dataCtrl = (function dataController() {
       return newItem;
     },
 
-    updateTotals: (item, type) => {
-      if (type === 'inc') {
-        data.totals.inc += item.value;
-      } else {
-        data.totals.exp += item.value;
-      }
-    },
-
     updateGroupValue: (group, item) => {
       group.total_value += item.value;
       return group.total_value;
-    }
+    },
 
+    updateTotals: (item, type) => {
+      data.totals[type] += item.value;
+      return data.totals;
+    },
   };
 }());
 
@@ -132,8 +126,8 @@ const UICtrl = (function UIController() {
       let chartGnrlEl = document.getElementById('chart--general').getContext('2d');
       let chartExpEl = document.getElementById('chart--exp').getContext('2d');
       let chartIncEl = document.getElementById('chart--inc').getContext('2d');
-      const green = '#50CC80';
-      const red = '#F8545F';
+      const green = ['#50CC80', '#4E9CBA', '#B0EF5E', '#76BAD4', '#6260C7'];
+      const red = ['#F8545F', '#FFAA56', '#E42E3B', '#FFD856', '#BA121E', '#EA8C30', '#FA7781', '#FFE079', '#FFBC79', '#EABF30', '#FFD2A5'];
   
       let legDisplay = true;
   
@@ -150,54 +144,61 @@ const UICtrl = (function UIController() {
           labels:['Rendas', 'Despesas'],
           datasets:[{
             data: [
-              50,
-              27
+              0,
+              0
             ],
     
           backgroundColor:[
-            green,
-            red,
-          ]
-          }]
-        }
-      });
-    
-      let chartExp = new Chart(chartExpEl, {
-        type: 'pie',
-        data:{
-          labels:['Entreterimento', 'Transporte', 'Comida'],
-          datasets:[{
-            data: [
-              1,
-              2,
-              3
-            ],
-    
-          backgroundColor:[
-            green,
-            red,
-          ]
-          }]
-        }
-      });
-    
-      let chartInc = new Chart(chartIncEl, {
-        type: 'pie',
-        data:{
-          labels:['Salário'],
-          datasets:[{
-            data: [
-              100
-            ],
-    
-          backgroundColor:[
-            green,
+            green[0],
+            red[0],
           ]
           }]
         }
       });
 
-      const charts = [chartGnrl, chartExp, chartInc];
+      let chartInc = new Chart(chartIncEl, {
+        type: 'pie',
+        data:{
+          labels:[],
+          datasets:[{
+            data: [],
+    
+          backgroundColor:[
+            green[0],
+            green[1],
+            green[2],
+            green[3],
+            green[4]
+          ]
+          }]
+        }
+      });
+
+      let chartExp = new Chart(chartExpEl, {
+        type: 'pie',
+        data:{
+          labels:[],
+          datasets:[{
+            data: [],
+    
+          backgroundColor:[
+            red[0],
+            red[1],
+            red[2],
+            red[3],
+            red[4],
+            red[5],
+            red[6],
+            red[7],
+            red[8],
+            red[9],
+            red[10]
+          ]
+          }]
+        }
+      });
+
+      const charts = [chartGnrl, chartInc, chartExp];
       return charts;
     },
 
@@ -278,7 +279,52 @@ const UICtrl = (function UIController() {
         option.value = values[i];
         optionSelector.options.add(option);
       }
-    }
+    },
+
+    updateCharts: (charts, newItem, newGroup) => {
+      let i;
+
+      if (newGroup.type === 'inc') {
+        i = 1;
+      } else {
+        i = 2;
+      }
+
+      charts[0].data.datasets[0].data[i-1] += newItem.value;
+
+      const index = charts[i].data.labels.findIndex((el, index) => (el === newGroup.name));
+
+      if (index !== -1) {
+        charts[i].data.datasets[0].data[index] += newItem.value;
+      
+      } else {
+        charts[i].data.labels.push(newGroup.name);
+        charts[i].data.datasets[0].data.push(newItem.value);
+      }
+
+      charts.forEach((el) => {
+        el.update();
+      });
+    },
+
+    updateBudget: (inc, exp) => {
+      const budgetContainer = document.getElementById('display-budget');
+      const expContainer = document.getElementById('display-exp');
+      const incContainer = document.getElementById('display-inc');
+      const expPercent = document.getElementById('display-percent');
+      let percent;
+
+      if (inc !== 0) {
+        percent = Math.round(exp/inc*100);
+      } else {
+        percent = 0;
+      }
+
+      expContainer.innerHTML = `R$${exp}`;
+      incContainer.innerHTML = `R$${inc}`;
+      budgetContainer.innerHTML = `R$${inc - exp}`;
+      expPercent.innerHTML = `${percent}% do saldo gasto`
+    },
   };
 }());
 
@@ -302,6 +348,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
 
   const ctrlAddItem = function addGroupAndItemToTheDataStructureAndUI() {
     const input = UICtrl.getInput();
+    let totals;
     let newItem;
     let newGroup;
     if (!isNaN(input.value)) {
@@ -312,14 +359,17 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
-      dataCtrl.updateTotals(newItem, newGroup.type);
       UICtrl.updateOptions(options, newGroup.type);
+      totals = dataCtrl.updateTotals(newItem, newGroup.type);
+      UICtrl.updateCharts(charts, newItem, newGroup);
+      UICtrl.updateBudget(totals.inc, totals.exp);
     }
   };
 
   const restartFields = function setTheDefaultValuesToFields() {
     UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
     UICtrl.clearFields();
+    UICtrl.updateBudget(0, 0);
   };
 
   const setEvtLst = function setEventListeners() {

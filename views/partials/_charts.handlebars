@@ -7,18 +7,18 @@
       <div class='chart chart--main'>
         <h2 class='chart__title'>Balanço Geral</h2>
         <canvas id='chart--general' class='chart__pie aa'></canvas>
-        <h2>$VALOR</h2>
+        <h2 id='display-budget'>$VALOR</h2>
       </div>
       <div class='chart chart--exp'>
         <h2 class='chart__title'>Despesas</h2>
         <canvas id='chart--exp' class='chart__pie'></canvas>
-        <h2>-$VALOR</h2>
-        <h6 class='chart__percentage'>$PORCENTAGEM% de todo o saldo</h6>
+        <h2 id='display-exp'>-$VALOR</h2>
+        <h6 id='display-percent' class='chart__percentage'>$PORCENTAGEM% de todo o saldo</h6>
       </div>
       <div class='chart chart--inc'>
         <h2 class='chart__title'>Rendas</h2>
         <canvas id='chart--inc' class='chart__pie'></canvas>
-        <h2>+$VALOR</h2>
+        <h2 id='display-inc'>+$VALOR</h2>
       </div>
     </div>
 
