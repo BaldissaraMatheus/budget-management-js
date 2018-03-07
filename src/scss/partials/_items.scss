@@ -31,9 +31,22 @@
   width: 100%;
 }
 
-.card__pic {
-  display: block;
+.card__icon {
+  display: flex;
+  align-items: center;
+  padding-left: 12px;
   float: left;
+  width: 65px;
+  height: 65px;
+  @include border-radius(50%);
+}
+
+.card__icon--inc {
+  background-color: transparentize($green, 0.5);
+}
+
+.card__icon--exp {
+  background-color: transparentize($orange, 0.5);
 }
 
 .card__data {

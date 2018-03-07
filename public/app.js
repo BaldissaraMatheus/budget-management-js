@@ -34,12 +34,14 @@ var dataCtrl = function dataController() {
 
   var options = {
     exp: {
-      names: ['Comida', 'Saúde', 'Serviços', 'Transporte', 'Entreterimento', 'Produtos Essenciais', 'Produtos Diversos', 'Impostos', 'Empréstimos', 'Investimentos', 'Outros'],
-      values: ['food', 'health', 'serv_exp', 'trasp', 'ent', 'prod_ess', 'prod_misc', 'tax', 'loan', 'inv_exp', 'others_exp']
+      names: ['Comida', 'Saúde', 'Serviços', 'Educação', 'Transporte', 'Entreterimento', 'Produtos Essenciais', 'Produtos Diversos', 'Impostos', 'Empréstimos', 'Investimentos', 'Outros'],
+      values: ['food', 'health', 'serv_exp', 'educ', 'trasp', 'ent', 'prod_ess', 'prod_misc', 'tax', 'loan', 'inv_exp', 'others_exp'],
+      icons: ['fa-utensils', 'fa-stethoscope', 'fa-cut', 'fa-university', 'fa-car', 'fa-gamepad', 'fa-home', 'fa-shopping-cart', 'fa-balance-scale', 'fa-money-bill-alt', 'fa-chart-pie', 'fa-bomb']
     },
     inc: {
       names: ['Salário', 'Vendas', 'Serviços', 'Investimentos', 'Outros'],
-      values: ['sal', 'sales', 'serv_inc', 'inv_inc', 'others_inc']
+      values: ['sal', 'sales', 'serv_inc', 'inv_inc', 'others_inc'],
+      icons: ['fa-money-bill-alt', 'fa-truck', 'fa-briefcase', 'fa-chart-line', 'fa-bomb']
     }
   };
 
@@ -116,7 +118,7 @@ var UICtrl = function UIController() {
     getInput: function getInput() {
       return {
         groupName: document.querySelector(DOMstrings.selectGroup).value,
-        selectOptionIntex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
+        selectOptionIndex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
         desc: document.querySelector(DOMstrings.inputDesc).value,
         type: document.querySelector(DOMstrings.selectType).value,
         value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
@@ -185,18 +187,18 @@ var UICtrl = function UIController() {
       return charts;
     },
 
-    addGroupUI: function addGroupUI(group, mobileDevice) {
+    addGroupUI: function addGroupUI(group, mobileDevice, icon) {
       var container = DOMstrings.container;
       var elClass = void 0;
       var html = void 0;
       if (!document.getElementById(group.name)) {
         if (mobileDevice === true) {
-          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
           if (group.type === 'inc') {
-            html = "<div id='$ID' class='card shadow inc-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow inc-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           } else {
-            html = "<div id='$ID' class='card shadow exp-container $TYPE'><div class='card__head'><img src='https://dummyimage.com/50x50/000/fff' class='card__pic'><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow exp-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           }
         }
 
@@ -204,6 +206,8 @@ var UICtrl = function UIController() {
         html = html.replace('$TYPE', group.type);
         html = html.replace('$NAME', group.text);
         html = html.replace('$VALUE', group.total_value);
+        html = html.replace('$TYPE-ICON', group.type);
+        html = html.replace('$ICON', icon);
 
         if (html.includes('$LISTCLASS')) {
           html = html.replace('$LISTCLASS', group.name);
@@ -336,9 +340,9 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     var newGroup = void 0;
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';
-      newGroup = dataCtrl.addGroup(input.groupName, input.type, options[input.type].names[input.selectOptionIntex]);
+      newGroup = dataCtrl.addGroup(input.groupName, input.type, options[input.type].names[input.selectOptionIndex]);
       newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, input.value);
-      UICtrl.addGroupUI(newGroup, mobileDevice);
+      UICtrl.addGroupUI(newGroup, mobileDevice, options[input.type].icons[input.selectOptionIndex]);
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
@@ -346,6 +350,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       totals = dataCtrl.updateTotals(newItem, newGroup.type);
       UICtrl.updateCharts(charts, newItem, newGroup);
       UICtrl.updateBudget(totals.inc, totals.exp);
+      UICtrl.clearFields();
     }
   };
 
