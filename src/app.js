@@ -90,6 +90,7 @@ const dataCtrl = (function dataController() {
       data.totals[type] += item.value;
       return data.totals;
     },
+
   };
 }());
 
@@ -97,6 +98,8 @@ const UICtrl = (function UIController() {
   
   const DOMstrings = {
     addBtn: '#add-btn',
+    createBtn: '#create-btn',
+    addForm: '#form-add',
     inputValue: '#value',
     selectGroup: '#group',
     inputDesc: '#desc',
@@ -212,21 +215,21 @@ const UICtrl = (function UIController() {
     },
 
     addGroupUI: (group, mobileDevice, icon) => {
-      const containerMobile = DOMstrings.containerMobile;
       const containerInc = DOMstrings.containerInc;
       const containerExp = DOMstrings.containerExp;
       let html;
 
       if(!document.getElementById(group.name)) {
-        if (mobileDevice === true) {
+       /* if (mobileDevice === true) {
           html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
-          if (group.type === 'inc') {       
-            html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
-          } else {  
-            html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
-          }
+          */
+        if (group.type === 'inc') {       
+          html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+        } else {  
+          html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         }
+      
         
         html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
@@ -238,9 +241,10 @@ const UICtrl = (function UIController() {
         if (html.includes('$LISTCLASS')) {
           html = html.replace('$LISTCLASS', group.name);
         }
+        /*
         if(mobileDevice === true) {
           document.querySelector(containerMobile).insertAdjacentHTML('beforeend', html);
-        } else if (group.type === 'inc') {
+        } else*/ if (group.type === 'inc') {
           document.querySelector(containerInc).insertAdjacentHTML('beforeend', html);
         } else {
           document.querySelector(containerExp).insertAdjacentHTML('beforeend', html);
@@ -343,21 +347,40 @@ const UICtrl = (function UIController() {
       budgetContainer.innerHTML = `R$${inc - exp}`;
       expPercent.innerHTML = `${percent}% do saldo gasto`;
     },
+
+    displayForm: () => {
+      const form = document.querySelector(DOMstrings.addForm);
+      form.classList.toggle('js-form--hide');
+    },
+
+    hideForm: () => {
+      const form = document.querySelector(DOMstrings.addForm);
+      form.classList.add('js-form--hide');
+    },
+
+    showForm: () => {
+      const form = document.querySelector(DOMstrings.addForm);
+      form.classList.remove('js-form--hide');
+    }
+
   };
 }());
 
 const mainCtrl = (function generalController(dataCtrl, UICtrl) {
   const options = dataCtrl.getOptions();
   let winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-  let mobileDevice;
+  let mobileDevice = false;
   let charts;
 
-  if (winWidth < 768) {
-    mobileDevice = true;
-
-  } else {
-    mobileDevice = false;
-  }
+  const setMobileUI = function setUIForMobileUsers() {
+    if (mobileDevice === true && winWidth > 768) {
+      mobileDevice = false;
+      UICtrl.showForm();
+    } else if (mobileDevice === false && winWidth < 768) {
+      mobileDevice = true;
+      UICtrl.hideForm();
+    }
+  };
 
   const createCharts = function createAndGetChartsFromTheUIController(winWidth) {
     const charts = UICtrl.displayCharts(winWidth);
@@ -401,6 +424,13 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     document.querySelector(DOMobj.selectType).addEventListener('change', () => {
       const input = UICtrl.getInput();
       UICtrl.updateOptions(options, input.type);
+    });
+    document.querySelector(DOMobj.createBtn).addEventListener('click', () => {
+      UICtrl.displayForm();
+    });
+    window.addEventListener('resize', () => {
+      winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      setMobileUI();
     });
   };
 

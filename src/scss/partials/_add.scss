@@ -1,11 +1,3 @@
-.add-section {
-  display: none;
-
-  @media screen and (min-width: 768px) {
-    display: block;
-  }
-}
-
 .form {
   display: flex;
   margin-bottom: 10px;
@@ -75,4 +67,12 @@
   @media screen and (min-width: 768px) {
     display: none;
   }
+}
+
+.js-form {
+  display: block;
+}
+
+.js-form--hide {
+  display: none;
 }

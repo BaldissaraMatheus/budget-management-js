@@ -96,6 +96,7 @@ var dataCtrl = function dataController() {
       data.totals[type] += item.value;
       return data.totals;
     }
+
   };
 }();
 
@@ -103,6 +104,8 @@ var UICtrl = function UIController() {
 
   var DOMstrings = {
     addBtn: '#add-btn',
+    createBtn: '#create-btn',
+    addForm: '#form-add',
     inputValue: '#value',
     selectGroup: '#group',
     inputDesc: '#desc',
@@ -194,20 +197,19 @@ var UICtrl = function UIController() {
     },
 
     addGroupUI: function addGroupUI(group, mobileDevice, icon) {
-      var containerMobile = DOMstrings.containerMobile;
       var containerInc = DOMstrings.containerInc;
       var containerExp = DOMstrings.containerExp;
       var html = void 0;
 
       if (!document.getElementById(group.name)) {
-        if (mobileDevice === true) {
-          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+        /* if (mobileDevice === true) {
+           html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+         } else {
+           */
+        if (group.type === 'inc') {
+          html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
-          if (group.type === 'inc') {
-            html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
-          } else {
-            html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
-          }
+          html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         }
 
         html = html.replace('$ID', group.name);
@@ -220,9 +222,10 @@ var UICtrl = function UIController() {
         if (html.includes('$LISTCLASS')) {
           html = html.replace('$LISTCLASS', group.name);
         }
-        if (mobileDevice === true) {
+        /*
+        if(mobileDevice === true) {
           document.querySelector(containerMobile).insertAdjacentHTML('beforeend', html);
-        } else if (group.type === 'inc') {
+        } else*/if (group.type === 'inc') {
           document.querySelector(containerInc).insertAdjacentHTML('beforeend', html);
         } else {
           document.querySelector(containerExp).insertAdjacentHTML('beforeend', html);
@@ -325,21 +328,41 @@ var UICtrl = function UIController() {
       incContainer.innerHTML = 'R$' + inc;
       budgetContainer.innerHTML = 'R$' + (inc - exp);
       expPercent.innerHTML = percent + '% do saldo gasto';
+    },
+
+    displayForm: function displayForm() {
+      var form = document.querySelector(DOMstrings.addForm);
+      form.classList.toggle('js-form--hide');
+    },
+
+    hideForm: function hideForm() {
+      var form = document.querySelector(DOMstrings.addForm);
+      form.classList.add('js-form--hide');
+    },
+
+    showForm: function showForm() {
+      var form = document.querySelector(DOMstrings.addForm);
+      form.classList.remove('js-form--hide');
     }
+
   };
 }();
 
 var mainCtrl = function generalController(dataCtrl, UICtrl) {
   var options = dataCtrl.getOptions();
   var winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-  var mobileDevice = void 0;
+  var mobileDevice = false;
   var charts = void 0;
 
-  if (winWidth < 768) {
-    mobileDevice = true;
-  } else {
-    mobileDevice = false;
-  }
+  var setMobileUI = function setUIForMobileUsers() {
+    if (mobileDevice === true && winWidth > 768) {
+      mobileDevice = false;
+      UICtrl.showForm();
+    } else if (mobileDevice === false && winWidth < 768) {
+      mobileDevice = true;
+      UICtrl.hideForm();
+    }
+  };
 
   var createCharts = function createAndGetChartsFromTheUIController(winWidth) {
     var charts = UICtrl.displayCharts(winWidth);
@@ -383,6 +406,13 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     document.querySelector(DOMobj.selectType).addEventListener('change', function () {
       var input = UICtrl.getInput();
       UICtrl.updateOptions(options, input.type);
+    });
+    document.querySelector(DOMobj.createBtn).addEventListener('click', function () {
+      UICtrl.displayForm();
+    });
+    window.addEventListener('resize', function () {
+      winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      setMobileUI();
     });
   };
 

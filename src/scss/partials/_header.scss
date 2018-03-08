@@ -12,12 +12,16 @@
 .nav {
   display: flex;
   flex-wrap: nowrap;
-  justify-content: space-between;
   margin-top:8px;
+  justify-content: right;
+  @media screen and (min-width: 768px) {
+    justify-content: space-between;
+
+  }
 }
 
 .nav-list {
-    margin-top: 8px
+    margin-top: 8px;
 }
 
 .nav__title {
@@ -27,20 +31,7 @@
   }
 }
 
-.dropdown--add-budget-mbl {
-  @media screen and (min-width: 768px) {
-    display: none;
-  }
-}
-
 .nav-list__item {
   display: inline;
-  padding-left: 10px;
-}
-
-.nav-list__item:nth-child(1) {
-  display: none;
-  @media screen and (min-width: 768px) {
-    display: inline-block;
-  }
+  padding-right: 8px;
 }
