@@ -47,6 +47,10 @@ const dataCtrl = (function dataController() {
       return options;
     },
 
+    formatNumber: () => {
+
+    },
+
     addGroup: (name, type, text) => {
       let pos;
 
@@ -65,9 +69,9 @@ const dataCtrl = (function dataController() {
     },
 
     addItem: (group, type, desc, val) => {
+      const date = moment().format("DD/MM/YYYY");
       let newItem;
       let id = 0;
-      const date = moment().format("DD/MM/YYYY");
       
       const pos = data.groups.findIndex((obj, index) => (obj.name === group));
 
@@ -314,7 +318,7 @@ const UICtrl = (function UIController() {
 
       charts[0].data.datasets[0].data[i-1] += newItem.value;
 
-      const index = charts[i].data.labels.findIndex((el, index) => (el === newGroup.name));
+      const index = charts[i].data.labels.findIndex((el, index) => (el === newGroup.text));
 
       if (index !== -1) {
         charts[i].data.datasets[0].data[index] += newItem.value;

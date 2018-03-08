@@ -50,6 +50,8 @@ var dataCtrl = function dataController() {
       return options;
     },
 
+    formatNumber: function formatNumber() {},
+
     addGroup: function addGroup(name, type, text) {
       var pos = void 0;
 
@@ -69,9 +71,9 @@ var dataCtrl = function dataController() {
     },
 
     addItem: function addItem(group, type, desc, val) {
+      var date = moment().format("DD/MM/YYYY");
       var newItem = void 0;
       var id = 0;
-      var date = moment().format("DD/MM/YYYY");
 
       var pos = data.groups.findIndex(function (obj, index) {
         return obj.name === group;
@@ -296,7 +298,7 @@ var UICtrl = function UIController() {
       charts[0].data.datasets[0].data[i - 1] += newItem.value;
 
       var index = charts[i].data.labels.findIndex(function (el, index) {
-        return el === newGroup.name;
+        return el === newGroup.text;
       });
 
       if (index !== -1) {
