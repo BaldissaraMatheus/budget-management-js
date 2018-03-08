@@ -17,17 +17,21 @@
   zoom: 1;
 }
 
-.inc-container {
-  float: right;
+.cards-container {
   width: 49%;
+  display: flex;
+  flex-direction: column;
 }
 
-.exp-container {
+.cards-container--exp {
   float: left;
-  width: 49%;
 }
 
-.mobile {
+.cards-container--inc {
+  float: right;
+}
+
+.cards-container--mobile {
   width: 100%;
 }
 

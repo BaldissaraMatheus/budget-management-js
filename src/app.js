@@ -101,7 +101,10 @@ const UICtrl = (function UIController() {
     selectGroup: '#group',
     inputDesc: '#desc',
     selectType: '#type',
-    container: '#cards-container'
+    container: '#cards-container',
+    containerInc: '#container-inc',
+    containerExp: '#container-exp',
+    containerMobile: '#container-mobile'
   };
 
   return {
@@ -122,6 +125,9 @@ const UICtrl = (function UIController() {
     clearFields: () => {
       document.querySelector(DOMstrings.inputDesc).value = '';
       document.querySelector(DOMstrings.inputValue).value = '';
+    },
+
+    setTypeInc: () => {
       document.querySelector(DOMstrings.selectType).selectedIndex = 0;
     },
 
@@ -206,17 +212,19 @@ const UICtrl = (function UIController() {
     },
 
     addGroupUI: (group, mobileDevice, icon) => {
-      const container = DOMstrings.container;
-      let elClass;
+      const containerMobile = DOMstrings.containerMobile;
+      const containerInc = DOMstrings.containerInc;
+      const containerExp = DOMstrings.containerExp;
       let html;
+
       if(!document.getElementById(group.name)) {
         if (mobileDevice === true) {
-          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAMEC<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
           if (group.type === 'inc') {       
-            html = "<div id='$ID' class='card shadow inc-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           } else {  
-            html = "<div id='$ID' class='card shadow exp-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+            html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
           }
         }
         
@@ -230,8 +238,13 @@ const UICtrl = (function UIController() {
         if (html.includes('$LISTCLASS')) {
           html = html.replace('$LISTCLASS', group.name);
         }
-        
-        document.querySelector(container).insertAdjacentHTML('beforeend', html);
+        if(mobileDevice === true) {
+          document.querySelector(containerMobile).insertAdjacentHTML('beforeend', html);
+        } else if (group.type === 'inc') {
+          document.querySelector(containerInc).insertAdjacentHTML('beforeend', html);
+        } else {
+          document.querySelector(containerExp).insertAdjacentHTML('beforeend', html);
+        }
       }
     },
 
@@ -373,9 +386,10 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
   };
 
   const restartFields = function setTheDefaultValuesToFields() {
-    UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
     UICtrl.clearFields();
     UICtrl.updateBudget(0, 0);
+    UICtrl.setTypeInc();
+    UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
   };
 
   const setEvtLst = function setEventListeners() {
