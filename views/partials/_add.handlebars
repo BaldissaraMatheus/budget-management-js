@@ -2,18 +2,26 @@
   <div class='container shadow'>
     <h2 class='form__title'>Adicionar</h2>
     <div class='form'>
-      <select name='type' id='type' class='form__element form__select select'>
-        <option value='inc'>+</option>
-        <option value='exp'>-</option>
-      </select>
-      <input for='text' id='desc' class='form__element form__input form__input--desc' placeholder='Descrição'>
-      <select name='group' id='group' class='form__element form__select form__select-group select'>
-        <option value='food'>Comida</option>
-        <option value='ent'>Entreterimento</option>
-        <option value='sal'>Salário</option>
-      </select>
-      <input for='value' id='value' class='form__element form__input form__input--value' placeholder='R$0,00'>
-      <button id='add-btn' class='form__element btn btn--add'>ENTRAR</button>
+      <div class='row row--1'>
+        <select name='type' id='type' class='form__element form__select-type select'>
+          <option value='inc'>+</option>
+          <option value='exp'>-</option>
+        </select>
+        <input for='text' id='desc' class='form__element form__input form__input--desc' placeholder='Descrição'>
+      </div>
+      <div class='row row--2'>
+        <select name='group' id='group' class='form__element form__select form__select-group select'>
+          <option value='food'>Comida</option>
+          <option value='ent'>Entreterimento</option>
+          <option value='sal'>Salário</option>
+        </select>
+        </div>
+        <div class='row row--3'>
+         <input for='value' id='value' class='form__element form__input form__input--value' placeholder='R$0,00'>
+      </div>
+      <div class='row row-center row--4'>
+        <button id='add-btn' class='form__element btn btn--add'>ENTRAR</button>
+      </div>
     </div>
   </div>
 </section>
