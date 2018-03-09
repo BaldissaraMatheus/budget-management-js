@@ -83,6 +83,8 @@ var dataCtrl = function dataController() {
         id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
       }
 
+      id = type + '-' + id;
+
       newItem = new Item(id, desc, val, date);
       data.groups[pos].items.push(newItem);
 
@@ -97,6 +99,54 @@ var dataCtrl = function dataController() {
     updateTotals: function updateTotals(item, type) {
       data.totals[type] += item.value;
       return data.totals;
+    },
+
+    getItemData: function getItemData(item) {
+      var groupIndex = data.groups.findIndex(function (group, i) {
+        return group.name === item.group;
+      });
+      var itemIndex = data.groups[groupIndex].items.findIndex(function (groupItem, i) {
+        return groupItem.id === item.id;
+      });
+      var itemValue = data.groups[groupIndex].items[itemIndex].value;
+
+      if (item.type === 'exp') {
+        itemValue *= -1;
+      }
+
+      var itemData = {
+        groupIndex: groupIndex,
+        itemIndex: itemIndex,
+        itemValue: itemValue
+      };
+
+      return itemData;
+    },
+
+    verGroup: function verGroup(item, itemData) {
+      if (data.groups[itemData.groupIndex].items.length === 0) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+
+    deleteItem: function deleteItem(item, itemData) {
+      var type = void 0;
+
+      if (item.type === 'inc') {
+        type = 0;
+      } else {
+        type = 1;
+      }
+      data.groups[itemData.groupIndex].total_value += itemData.value;
+      data.groups[itemData.groupIndex].items.splice(itemData.itemIndex, 1);
+    },
+
+    deleteGroup: function deleteGroup(item, itemData, proceed) {
+      if (proceed === true) {
+        data.groups.splice(itemData.groupIndex, 1);
+      }
     }
 
   };
@@ -115,7 +165,8 @@ var UICtrl = function UIController() {
     container: '#cards-container',
     containerInc: '#container-inc',
     containerExp: '#container-exp',
-    containerMobile: '#container-mobile'
+    containerMobile: '#container-mobile',
+    delBtn: '.del-btn'
   };
 
   return {
@@ -246,12 +297,13 @@ var UICtrl = function UIController() {
         sign = '-';
       }
 
-      html = "<li class='card__list__item'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6></div></li>";
+      html = "<li class='card__list__item' id='$ID'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6><h2><a href='#' class='del-btn'>-</a></h2></div></li>";
 
       html = html.replace('$DESC', item.desc);
       html = html.replace('$VALUE', item.value);
       html = html.replace('$SIGN', sign);
       html = html.replace('$DATE', item.date);
+      html = html.replace('$ID', item.id);
 
       document.querySelector(container).insertAdjacentHTML('beforeend', html);
     },
@@ -332,6 +384,18 @@ var UICtrl = function UIController() {
       expPercent.innerHTML = percent + '% do saldo gasto';
     },
 
+    deleteItem: function deleteItem(item) {
+      var DOMitem = document.getElementById(item.id);
+      DOMitem.innerHTML = '';
+    },
+
+    deleteGroup: function deleteGroup(item, proceede) {
+      var card = document.getElementById(item.group);
+      if (proceede === true) {
+        card.innerHTML = '';
+      }
+    },
+
     displayForm: function displayForm() {
       var form = document.querySelector(DOMstrings.addForm);
       form.classList.toggle('js-form--hide');
@@ -399,6 +463,51 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
   };
 
+  var getItem = function getSelectedItem(e) {
+    var selector = e.target;
+
+    if (selector.classList.contains('del-btn')) {
+      selector = selector.parentNode.parentNode.parentNode;
+
+      // get ID
+      var id = selector.id;
+
+      // get Group
+      var group = selector.parentNode;
+      group = group.className.split(' ');
+      group = group[group.length - 1];
+
+      // get Type
+      var type = selector.parentNode.parentNode;
+      type = type.className.split(' ');
+      type = type[type.length - 1];
+
+      var item = {
+        id: id,
+        group: group,
+        type: type
+      };
+
+      return item;
+    }
+  };
+
+  var ctrlDelItem = function deleteItemFromDataAndUI(e) {
+    var item = getItem(e);
+    var itemData = dataCtrl.getItemData(item);
+    var emptyGroup = void 0;
+
+    dataCtrl.deleteItem(item, itemData);
+    emptyGroup = dataCtrl.verGroup(item, itemData);
+    UICtrl.updateGroupValueUI(item.group);
+    dataCtrl.deleteGroup(item, itemData, emptyGroup);
+    UICtrl.deleteItem(item);
+    UICtrl.deleteGroup(item, emptyGroup);
+
+    //UICtrl.updateCharts(charts, item, newGroup);
+    //UICtrl.updateBudget(totals.inc, totals.exp);
+  };
+
   var setEvtLst = function setEventListeners() {
     var DOMobj = UICtrl.getDOMstrings();
     document.querySelector(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
@@ -412,6 +521,8 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     document.querySelector(DOMobj.createBtn).addEventListener('click', function () {
       UICtrl.displayForm();
     });
+    document.querySelector(DOMobj.container).addEventListener('click', ctrlDelItem);
+
     window.addEventListener('resize', function () {
       winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
       setMobileUI();

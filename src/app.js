@@ -79,6 +79,8 @@ const dataCtrl = (function dataController() {
         id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
       }
 
+      id = `${type}-${id}`;
+
       newItem = new Item(id, desc, val, date);
       data.groups[pos].items.push(newItem);
 
@@ -93,6 +95,50 @@ const dataCtrl = (function dataController() {
     updateTotals: (item, type) => {
       data.totals[type] += item.value;
       return data.totals;
+    },
+
+    getItemData: (item) => {
+      const groupIndex = data.groups.findIndex((group, i) => (group.name === item.group));
+      const itemIndex = data.groups[groupIndex].items.findIndex((groupItem, i) => (groupItem.id === item.id));
+      let itemValue = data.groups[groupIndex].items[itemIndex].value;
+
+      if (item.type === 'exp') {
+        itemValue *= -1;
+      }
+
+      const itemData = {
+        groupIndex: groupIndex,
+        itemIndex: itemIndex,
+        itemValue: itemValue
+      };
+
+      return itemData;
+    },
+
+    verGroup: (item, itemData) => {
+      if (data.groups[itemData.groupIndex].items.length === 0) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+
+    deleteItem: (item, itemData) => {
+      let type;
+
+      if (item.type === 'inc') {
+        type = 0;
+      } else {
+        type = 1;
+      }
+      data.groups[itemData.groupIndex].total_value += itemData.value;
+      data.groups[itemData.groupIndex].items.splice(itemData.itemIndex, 1);
+    },
+
+    deleteGroup: (item, itemData, proceed) => {
+      if (proceed === true) {
+        data.groups.splice(itemData.groupIndex, 1);
+      }
     },
 
   };
@@ -111,7 +157,8 @@ const UICtrl = (function UIController() {
     container: '#cards-container',
     containerInc: '#container-inc',
     containerExp: '#container-exp',
-    containerMobile: '#container-mobile'
+    containerMobile: '#container-mobile',
+    delBtn: '.del-btn'
   };
 
   return {
@@ -267,12 +314,13 @@ const UICtrl = (function UIController() {
         sign = '-';
       }
 
-      html = "<li class='card__list__item'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6></div></li>";
+      html = "<li class='card__list__item' id='$ID'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6><h2><a href='#' class='del-btn'>-</a></h2></div></li>";
 
       html = html.replace('$DESC', item.desc);
       html = html.replace('$VALUE', item.value);
       html = html.replace('$SIGN', sign);
       html = html.replace('$DATE', item.date);
+      html = html.replace('$ID', item.id);
       
       document.querySelector(container).insertAdjacentHTML('beforeend', html);
     },
@@ -352,6 +400,18 @@ const UICtrl = (function UIController() {
       expPercent.innerHTML = `${percent}% do saldo gasto`;
     },
 
+    deleteItem: (item) => {
+      const DOMitem = document.getElementById(item.id);
+      DOMitem.innerHTML = '';
+    },
+
+    deleteGroup: (item, proceede) => {
+      const card = document.getElementById(item.group);
+      if (proceede === true) {
+        card.innerHTML = '';
+      }
+    },
+
     displayForm: () => {
       const form = document.querySelector(DOMstrings.addForm);
       form.classList.toggle('js-form--hide');
@@ -419,6 +479,51 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
   };
 
+  const getItem = function getSelectedItem(e) {
+    let selector = e.target;
+    
+    if (selector.classList.contains('del-btn')) {
+      selector = selector.parentNode.parentNode.parentNode;
+      
+      // get ID
+      const id = selector.id;
+
+      // get Group
+      let group = selector.parentNode;
+      group = group.className.split(' ');
+      group = group[group.length - 1];
+
+      // get Type
+      let type = selector.parentNode.parentNode;
+      type = type.className.split(' ');
+      type = type[type.length - 1];
+
+      const item = {
+        id: id,
+        group: group,
+        type: type
+      };
+
+      return item;
+    } 
+  };
+
+  const ctrlDelItem = function deleteItemFromDataAndUI(e) {
+    const item = getItem(e);
+    const itemData = dataCtrl.getItemData(item);
+    let emptyGroup;
+
+    dataCtrl.deleteItem(item, itemData);
+    emptyGroup = dataCtrl.verGroup(item, itemData);
+    UICtrl.updateGroupValueUI(item.group);
+    dataCtrl.deleteGroup(item, itemData, emptyGroup);
+    UICtrl.deleteItem(item);
+    UICtrl.deleteGroup(item, emptyGroup);
+    
+    //UICtrl.updateCharts(charts, item, newGroup);
+    //UICtrl.updateBudget(totals.inc, totals.exp);
+  };
+
   const setEvtLst = function setEventListeners() {
     const DOMobj = UICtrl.getDOMstrings();
     document.querySelector(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
@@ -432,6 +537,8 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     document.querySelector(DOMobj.createBtn).addEventListener('click', () => {
       UICtrl.displayForm();
     });
+    document.querySelector(DOMobj.container).addEventListener('click', ctrlDelItem);
+
     window.addEventListener('resize', () => {
       winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
       setMobileUI();
