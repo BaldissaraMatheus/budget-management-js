@@ -47,10 +47,6 @@ const dataCtrl = (function dataController() {
       return options;
     },
 
-    formatNumber: () => {
-
-    },
-
     addGroup: (name, type, text) => {
       let pos;
 
@@ -68,7 +64,7 @@ const dataCtrl = (function dataController() {
       }
     },
 
-    addItem: (group, type, desc, val) => {
+    addItem: (group, type, desc, value) => {
       const date = moment().format("DD/MM/YYYY");
       let id = 0;
       let newItem;
@@ -79,14 +75,17 @@ const dataCtrl = (function dataController() {
         id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
       }
 
-      newItem = new Item(id, desc, val, date);
+      newItem = new Item(id, desc, value, date);
       data.groups[pos].items.push(newItem);
 
       return newItem;
     },
 
     updateGroupValue: (group, item) => {
-      group.total_value += item.value;
+      const total = group.total_value;
+      const sum = (total + item.value);
+
+      group.total_value = parseFloat(sum.toFixed(2));
       return group.total_value;
     },
 
@@ -186,15 +185,23 @@ const UICtrl = (function UIController() {
     },
 
     getInput: () => {
+      const inputValue = document.querySelector(DOMstrings.inputValue).value;
+      let newValue;
+      if (inputValue.includes(',')) {
+        newValue = inputValue.replace(',','.');
+        while (newValue.includes(',')) {
+          newValue = newValue.replace(',', '');
+        }
+      }
       return {
         groupName: document.querySelector(DOMstrings.selectGroup).value,
         selectOptionIndex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
         desc: document.querySelector(DOMstrings.inputDesc).value,
         type: document.querySelector(DOMstrings.selectType).value,
-        value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
+        value: parseFloat(newValue)
       };
     },
-    
+
     clearFields: () => {
       document.querySelector(DOMstrings.inputDesc).value = '';
       document.querySelector(DOMstrings.inputValue).value = '';
@@ -377,8 +384,8 @@ const UICtrl = (function UIController() {
       let i;
       let balance;
 
-      console.log(totals);
       balance = totals.exp/totals.inc * 100;
+      balance = balance.toFixed(2);
       
       charts[0].data.datasets[0].data[1] = balance;
       charts[0].data.datasets[0].data[0] = 100 - balance;
@@ -412,14 +419,15 @@ const UICtrl = (function UIController() {
       let percent;
 
       if (inc !== 0) {
-        percent = Math.round(exp/inc*100);
+        percent = exp/inc*100;
+        percent = percent.toFixed(2);
       } else {
         percent = 0;
       }
 
-      expContainer.innerHTML = `R$${exp}`;
-      incContainer.innerHTML = `R$${inc}`;
-      budgetContainer.innerHTML = `R$${inc - exp}`;
+      expContainer.innerHTML = `R$${exp.toFixed(2)}`;
+      incContainer.innerHTML = `R$${inc.toFixed(2)}`;
+      budgetContainer.innerHTML = `R$${(inc - exp).toFixed(2)}`;
       expPercent.innerHTML = `${percent}% do saldo gasto`;
     },
 
@@ -474,6 +482,16 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     return charts;
   };
 
+
+  const formatNum = function formatNumber(numIn) {
+    let numOut;
+
+    numOut = parseFloat(numIn.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,'));
+    numOut = Math.abs(numOut);
+
+    return numOut;
+  };
+
   const ctrlAddItem = function addGroupAndItemToTheDataStructureAndUI() {
     const input = UICtrl.getInput();
     let totals;
@@ -482,7 +500,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';        
       newGroup = dataCtrl.addGroup(input.groupName, input.type, options[input.type].names[input.selectOptionIndex]);
-      newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, input.value);
+      newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, formatNum(input.value));
       UICtrl.addGroupUI(newGroup, mobileDevice, options[input.type].icons[input.selectOptionIndex]);
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);

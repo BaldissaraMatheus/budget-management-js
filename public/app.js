@@ -50,8 +50,6 @@ var dataCtrl = function dataController() {
       return options;
     },
 
-    formatNumber: function formatNumber() {},
-
     addGroup: function addGroup(name, type, text) {
       var pos = void 0;
 
@@ -70,7 +68,7 @@ var dataCtrl = function dataController() {
       }
     },
 
-    addItem: function addItem(group, type, desc, val) {
+    addItem: function addItem(group, type, desc, value) {
       var date = moment().format("DD/MM/YYYY");
       var id = 0;
       var newItem = void 0;
@@ -83,14 +81,17 @@ var dataCtrl = function dataController() {
         id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
       }
 
-      newItem = new Item(id, desc, val, date);
+      newItem = new Item(id, desc, value, date);
       data.groups[pos].items.push(newItem);
 
       return newItem;
     },
 
     updateGroupValue: function updateGroupValue(group, item) {
-      group.total_value += item.value;
+      var total = group.total_value;
+      var sum = total + item.value;
+
+      group.total_value = parseFloat(sum.toFixed(2));
       return group.total_value;
     },
 
@@ -195,12 +196,20 @@ var UICtrl = function UIController() {
     },
 
     getInput: function getInput() {
+      var inputValue = document.querySelector(DOMstrings.inputValue).value;
+      var newValue = void 0;
+      if (inputValue.includes(',')) {
+        newValue = inputValue.replace(',', '.');
+        while (newValue.includes(',')) {
+          newValue = newValue.replace(',', '');
+        }
+      }
       return {
         groupName: document.querySelector(DOMstrings.selectGroup).value,
         selectOptionIndex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
         desc: document.querySelector(DOMstrings.inputDesc).value,
         type: document.querySelector(DOMstrings.selectType).value,
-        value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
+        value: parseFloat(newValue)
       };
     },
 
@@ -361,8 +370,8 @@ var UICtrl = function UIController() {
       var i = void 0;
       var balance = void 0;
 
-      console.log(totals);
       balance = totals.exp / totals.inc * 100;
+      balance = balance.toFixed(2);
 
       charts[0].data.datasets[0].data[1] = balance;
       charts[0].data.datasets[0].data[0] = 100 - balance;
@@ -397,14 +406,15 @@ var UICtrl = function UIController() {
       var percent = void 0;
 
       if (inc !== 0) {
-        percent = Math.round(exp / inc * 100);
+        percent = exp / inc * 100;
+        percent = percent.toFixed(2);
       } else {
         percent = 0;
       }
 
-      expContainer.innerHTML = 'R$' + exp;
-      incContainer.innerHTML = 'R$' + inc;
-      budgetContainer.innerHTML = 'R$' + (inc - exp);
+      expContainer.innerHTML = 'R$' + exp.toFixed(2);
+      incContainer.innerHTML = 'R$' + inc.toFixed(2);
+      budgetContainer.innerHTML = 'R$' + (inc - exp).toFixed(2);
       expPercent.innerHTML = percent + '% do saldo gasto';
     },
 
@@ -459,6 +469,15 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     return charts;
   };
 
+  var formatNum = function formatNumber(numIn) {
+    var numOut = void 0;
+
+    numOut = parseFloat(numIn.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,'));
+    numOut = Math.abs(numOut);
+
+    return numOut;
+  };
+
   var ctrlAddItem = function addGroupAndItemToTheDataStructureAndUI() {
     var input = UICtrl.getInput();
     var totals = void 0;
@@ -467,7 +486,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';
       newGroup = dataCtrl.addGroup(input.groupName, input.type, options[input.type].names[input.selectOptionIndex]);
-      newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, input.value);
+      newItem = dataCtrl.addItem(input.groupName, input.type, input.desc, formatNum(input.value));
       UICtrl.addGroupUI(newGroup, mobileDevice, options[input.type].icons[input.selectOptionIndex]);
       UICtrl.addItemUI(newItem, newGroup);
       dataCtrl.updateGroupValue(newGroup, newItem);
