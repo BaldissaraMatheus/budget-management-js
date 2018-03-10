@@ -79,8 +79,6 @@ const dataCtrl = (function dataController() {
         id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
       }
 
-      id = `${type}-${id}`;
-
       newItem = new Item(id, desc, val, date);
       data.groups[pos].items.push(newItem);
 
@@ -99,15 +97,25 @@ const dataCtrl = (function dataController() {
     },
 
     getItemData: (item) => {
+      let id = item.id;
+
+      if (item.type === 'inc') {
+        id = id.split('inc-');
+      } else {
+        id = id.split('exp-');
+      }
+
+      id = parseInt(id[1]);
+
       const groupIndex = data.groups.findIndex((group, i) => (group.name === item.group));
-      const itemIndex = data.groups[groupIndex].items.findIndex((groupItem, i) => (groupItem.id === item.id));
+      const itemIndex = data.groups[groupIndex].items.findIndex((groupItem, i) => (groupItem.id === id));
       let itemValue = data.groups[groupIndex].items[itemIndex].value;
 
       const itemData = {
         groupIndex: groupIndex,
         itemIndex: itemIndex,
         value: itemValue * -1,
-        id: item.id,
+        id: id,
         group: item.group,
         type: item.type
       };
@@ -314,11 +322,14 @@ const UICtrl = (function UIController() {
       const container = `.${group.name}`;
       let html;
       let sign;
+      let id;
 
       if (group.type === 'inc') {
         sign = '+';
+        id = `inc-${item.id}` ;
       } else {
         sign = '-';
+        id = `exp-${item.id}`;
       }
 
       html = "<li class='card__list__item' id='$ID'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6><h2><a href='#' class='del-btn'>-</a></h2></div></li>";
@@ -327,7 +338,7 @@ const UICtrl = (function UIController() {
       html = html.replace('$VALUE', item.value);
       html = html.replace('$SIGN', sign);
       html = html.replace('$DATE', item.date);
-      html = html.replace('$ID', item.id);
+      html = html.replace('$ID', id);
       
       document.querySelector(container).insertAdjacentHTML('beforeend', html);
     },
@@ -362,25 +373,30 @@ const UICtrl = (function UIController() {
       }
     },
 
-    updateCharts: (charts, newItem, newGroup) => {
+    updateCharts: (charts, item, group, totals) => {
       let i;
+      let balance;
 
-      if (newGroup.type === 'inc') {
+      console.log(totals);
+      balance = totals.exp/totals.inc * 100;
+      
+      charts[0].data.datasets[0].data[1] = balance;
+      charts[0].data.datasets[0].data[0] = 100 - balance;
+
+      if (group.type === 'inc') {
         i = 1;
       } else {
         i = 2;
       }
 
-      charts[0].data.datasets[0].data[i-1] += newItem.value;
-
-      const index = charts[i].data.labels.findIndex((el, index) => (el === newGroup.text));
+      const index = charts[i].data.labels.findIndex((el, index) => (el === group.text));
 
       if (index !== -1) {
-        charts[i].data.datasets[0].data[index] += newItem.value;
+        charts[i].data.datasets[0].data[index] += item.value;
       
       } else {
-        charts[i].data.labels.push(newGroup.text);
-        charts[i].data.datasets[0].data.push(newItem.value);
+        charts[i].data.labels.push(group.text);
+        charts[i].data.datasets[0].data.push(item.value);
       }
 
       charts.forEach((el) => {
@@ -408,7 +424,7 @@ const UICtrl = (function UIController() {
     },
 
     deleteItem: (item) => {
-      const DOMitem = document.getElementById(item.id);
+      const DOMitem = document.getElementById(`${item.type}-${item.id}`);
       DOMitem.parentNode.removeChild(DOMitem);
     },
 
@@ -473,7 +489,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
       UICtrl.updateGroupValueUI(newGroup);
       UICtrl.updateOptions(options, newGroup.type);
       totals = dataCtrl.updateTotals(newItem, newGroup);
-      UICtrl.updateCharts(charts, newItem, newGroup);
+      UICtrl.updateCharts(charts, newItem, newGroup, totals);
       UICtrl.updateBudget(totals.inc, totals.exp);
       UICtrl.clearFields();
     }
@@ -486,7 +502,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
   };
 
-  const getItem = function getSelectedItem(e) {
+  const getItemUI = function getSelectedItem(e) {
     let selector = e.target;
     
     if (selector.classList.contains('del-btn')) {
@@ -518,7 +534,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
   const ctrlDelItem = function deleteItemFromDataAndUI(e) {
 // Mudar tudo aqui pra retornar os objetos dos items e grupos como estão na estrutura de dados    
     
-    let item = getItem(e);
+    let item = getItemUI(e);
     item = dataCtrl.getItemData(item);
     let group = dataCtrl.getGroupData(item);
     let totals = dataCtrl.updateTotals(item, group);
@@ -532,7 +548,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     UICtrl.deleteItem(item);
     UICtrl.deleteGroup(item, emptyGroup); 
     UICtrl.updateBudget(totals.inc, totals.exp);
-    UICtrl.updateCharts(charts, item, group);
+    UICtrl.updateCharts(charts, item, group, totals);
   };
 
   const setEvtLst = function setEventListeners() {
