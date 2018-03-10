@@ -70,12 +70,12 @@ const dataCtrl = (function dataController() {
 
     addItem: (group, type, desc, val) => {
       const date = moment().format("DD/MM/YYYY");
-      let newItem;
       let id = 0;
+      let newItem;
       
       const pos = data.groups.findIndex((obj, index) => (obj.name === group));
 
-      if (data.groups[pos].items.length > 0){
+      if (data.groups[pos].items.length > 0) {
         id = data.groups[pos].items[data.groups[pos].items.length - 1].id + 1;
       }
 
@@ -92,7 +92,8 @@ const dataCtrl = (function dataController() {
       return group.total_value;
     },
 
-    updateTotals: (item, type) => {
+    updateTotals: (item, group) => {
+      type = group.type;
       data.totals[type] += item.value;
       return data.totals;
     },
@@ -102,28 +103,38 @@ const dataCtrl = (function dataController() {
       const itemIndex = data.groups[groupIndex].items.findIndex((groupItem, i) => (groupItem.id === item.id));
       let itemValue = data.groups[groupIndex].items[itemIndex].value;
 
-      if (item.type === 'exp') {
-        itemValue *= -1;
-      }
-
       const itemData = {
         groupIndex: groupIndex,
         itemIndex: itemIndex,
-        itemValue: itemValue
+        value: itemValue * -1,
+        id: item.id,
+        group: item.group,
+        type: item.type
       };
 
       return itemData;
     },
 
-    verGroup: (item, itemData) => {
-      if (data.groups[itemData.groupIndex].items.length === 0) {
+    getGroupData(item) {
+      const group = data.groups[item.groupIndex];
+      const groupObj = {
+        name: group.name,
+        type: group.type,
+        text: group.text,
+        total_value: group.total_value
+      };
+      return groupObj;
+    },
+
+    verGroup: (item) => {
+      if (data.groups[item.groupIndex].items.length === 0) {
         return true;
       } else {
         return false;
       }
     },
 
-    deleteItem: (item, itemData) => {
+    deleteItem: (item) => {
       let type;
 
       if (item.type === 'inc') {
@@ -131,13 +142,13 @@ const dataCtrl = (function dataController() {
       } else {
         type = 1;
       }
-      data.groups[itemData.groupIndex].total_value += itemData.value;
-      data.groups[itemData.groupIndex].items.splice(itemData.itemIndex, 1);
+      //data.groups[itemData.groupIndex].total_value += itemData.value;
+      data.groups[item.groupIndex].items.splice(item.itemIndex, 1);
     },
 
-    deleteGroup: (item, itemData, proceed) => {
+    deleteGroup: (item, proceed) => {
       if (proceed === true) {
-        data.groups.splice(itemData.groupIndex, 1);
+        data.groups.splice(item.groupIndex, 1);
       }
     },
 
@@ -271,10 +282,6 @@ const UICtrl = (function UIController() {
       let html;
 
       if(!document.getElementById(group.name)) {
-       /* if (mobileDevice === true) {
-          html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
-        } else {
-          */
         if (group.type === 'inc') {       
           html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {  
@@ -402,13 +409,13 @@ const UICtrl = (function UIController() {
 
     deleteItem: (item) => {
       const DOMitem = document.getElementById(item.id);
-      DOMitem.innerHTML = '';
+      DOMitem.parentNode.removeChild(DOMitem);
     },
 
     deleteGroup: (item, proceede) => {
       const card = document.getElementById(item.group);
       if (proceede === true) {
-        card.innerHTML = '';
+        card.parentNode.removeChild(card);
       }
     },
 
@@ -465,7 +472,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
       UICtrl.updateOptions(options, newGroup.type);
-      totals = dataCtrl.updateTotals(newItem, newGroup.type);
+      totals = dataCtrl.updateTotals(newItem, newGroup);
       UICtrl.updateCharts(charts, newItem, newGroup);
       UICtrl.updateBudget(totals.inc, totals.exp);
       UICtrl.clearFields();
@@ -509,19 +516,23 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
   };
 
   const ctrlDelItem = function deleteItemFromDataAndUI(e) {
-    const item = getItem(e);
-    const itemData = dataCtrl.getItemData(item);
+// Mudar tudo aqui pra retornar os objetos dos items e grupos como estão na estrutura de dados    
+    
+    let item = getItem(e);
+    item = dataCtrl.getItemData(item);
+    let group = dataCtrl.getGroupData(item);
+    let totals = dataCtrl.updateTotals(item, group);
     let emptyGroup;
 
-    dataCtrl.deleteItem(item, itemData);
-    emptyGroup = dataCtrl.verGroup(item, itemData);
-    UICtrl.updateGroupValueUI(item.group);
-    dataCtrl.deleteGroup(item, itemData, emptyGroup);
+    dataCtrl.deleteItem(item);
+    emptyGroup = dataCtrl.verGroup(item);
+    dataCtrl.updateGroupValue(group, item);
+    UICtrl.updateGroupValueUI(group);
+    dataCtrl.deleteGroup(item, emptyGroup);
     UICtrl.deleteItem(item);
-    UICtrl.deleteGroup(item, emptyGroup);
-    
-    //UICtrl.updateCharts(charts, item, newGroup);
-    //UICtrl.updateBudget(totals.inc, totals.exp);
+    UICtrl.deleteGroup(item, emptyGroup); 
+    UICtrl.updateBudget(totals.inc, totals.exp);
+    UICtrl.updateCharts(charts, item, group);
   };
 
   const setEvtLst = function setEventListeners() {

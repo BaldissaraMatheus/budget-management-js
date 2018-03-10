@@ -72,8 +72,8 @@ var dataCtrl = function dataController() {
 
     addItem: function addItem(group, type, desc, val) {
       var date = moment().format("DD/MM/YYYY");
-      var newItem = void 0;
       var id = 0;
+      var newItem = void 0;
 
       var pos = data.groups.findIndex(function (obj, index) {
         return obj.name === group;
@@ -96,7 +96,8 @@ var dataCtrl = function dataController() {
       return group.total_value;
     },
 
-    updateTotals: function updateTotals(item, type) {
+    updateTotals: function updateTotals(item, group) {
+      type = group.type;
       data.totals[type] += item.value;
       return data.totals;
     },
@@ -110,28 +111,39 @@ var dataCtrl = function dataController() {
       });
       var itemValue = data.groups[groupIndex].items[itemIndex].value;
 
-      if (item.type === 'exp') {
-        itemValue *= -1;
-      }
-
       var itemData = {
         groupIndex: groupIndex,
         itemIndex: itemIndex,
-        itemValue: itemValue
+        value: itemValue * -1,
+        id: item.id,
+        group: item.group,
+        type: item.type
       };
 
       return itemData;
     },
 
-    verGroup: function verGroup(item, itemData) {
-      if (data.groups[itemData.groupIndex].items.length === 0) {
+    getGroupData: function getGroupData(item) {
+      var group = data.groups[item.groupIndex];
+      var groupObj = {
+        name: group.name,
+        type: group.type,
+        text: group.text,
+        total_value: group.total_value
+      };
+      return groupObj;
+    },
+
+
+    verGroup: function verGroup(item) {
+      if (data.groups[item.groupIndex].items.length === 0) {
         return true;
       } else {
         return false;
       }
     },
 
-    deleteItem: function deleteItem(item, itemData) {
+    deleteItem: function deleteItem(item) {
       var type = void 0;
 
       if (item.type === 'inc') {
@@ -139,13 +151,13 @@ var dataCtrl = function dataController() {
       } else {
         type = 1;
       }
-      data.groups[itemData.groupIndex].total_value += itemData.value;
-      data.groups[itemData.groupIndex].items.splice(itemData.itemIndex, 1);
+      //data.groups[itemData.groupIndex].total_value += itemData.value;
+      data.groups[item.groupIndex].items.splice(item.itemIndex, 1);
     },
 
-    deleteGroup: function deleteGroup(item, itemData, proceed) {
+    deleteGroup: function deleteGroup(item, proceed) {
       if (proceed === true) {
-        data.groups.splice(itemData.groupIndex, 1);
+        data.groups.splice(item.groupIndex, 1);
       }
     }
 
@@ -255,10 +267,6 @@ var UICtrl = function UIController() {
       var html = void 0;
 
       if (!document.getElementById(group.name)) {
-        /* if (mobileDevice === true) {
-           html = "<div id='$ID' class='card shadow mobile-container $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
-         } else {
-           */
         if (group.type === 'inc') {
           html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         } else {
@@ -386,13 +394,13 @@ var UICtrl = function UIController() {
 
     deleteItem: function deleteItem(item) {
       var DOMitem = document.getElementById(item.id);
-      DOMitem.innerHTML = '';
+      DOMitem.parentNode.removeChild(DOMitem);
     },
 
     deleteGroup: function deleteGroup(item, proceede) {
       var card = document.getElementById(item.group);
       if (proceede === true) {
-        card.innerHTML = '';
+        card.parentNode.removeChild(card);
       }
     },
 
@@ -449,7 +457,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       dataCtrl.updateGroupValue(newGroup, newItem);
       UICtrl.updateGroupValueUI(newGroup);
       UICtrl.updateOptions(options, newGroup.type);
-      totals = dataCtrl.updateTotals(newItem, newGroup.type);
+      totals = dataCtrl.updateTotals(newItem, newGroup);
       UICtrl.updateCharts(charts, newItem, newGroup);
       UICtrl.updateBudget(totals.inc, totals.exp);
       UICtrl.clearFields();
@@ -478,14 +486,14 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       group = group[group.length - 1];
 
       // get Type
-      var type = selector.parentNode.parentNode;
-      type = type.className.split(' ');
-      type = type[type.length - 1];
+      var _type = selector.parentNode.parentNode;
+      _type = _type.className.split(' ');
+      _type = _type[_type.length - 1];
 
       var item = {
         id: id,
         group: group,
-        type: type
+        type: _type
       };
 
       return item;
@@ -493,19 +501,23 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
   };
 
   var ctrlDelItem = function deleteItemFromDataAndUI(e) {
+    // Mudar tudo aqui pra retornar os objetos dos items e grupos como estão na estrutura de dados    
+
     var item = getItem(e);
-    var itemData = dataCtrl.getItemData(item);
+    item = dataCtrl.getItemData(item);
+    var group = dataCtrl.getGroupData(item);
+    var totals = dataCtrl.updateTotals(item, group);
     var emptyGroup = void 0;
 
-    dataCtrl.deleteItem(item, itemData);
-    emptyGroup = dataCtrl.verGroup(item, itemData);
-    UICtrl.updateGroupValueUI(item.group);
-    dataCtrl.deleteGroup(item, itemData, emptyGroup);
+    dataCtrl.deleteItem(item);
+    emptyGroup = dataCtrl.verGroup(item);
+    dataCtrl.updateGroupValue(group, item);
+    UICtrl.updateGroupValueUI(group);
+    dataCtrl.deleteGroup(item, emptyGroup);
     UICtrl.deleteItem(item);
     UICtrl.deleteGroup(item, emptyGroup);
-
-    //UICtrl.updateCharts(charts, item, newGroup);
-    //UICtrl.updateBudget(totals.inc, totals.exp);
+    UICtrl.updateBudget(totals.inc, totals.exp);
+    UICtrl.updateCharts(charts, item, group);
   };
 
   var setEvtLst = function setEventListeners() {
