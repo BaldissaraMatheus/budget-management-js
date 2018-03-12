@@ -90,7 +90,7 @@ const dataCtrl = (function dataController() {
     },
 
     updateTotals: (item, group) => {
-      type = group.type;
+      const type = group.type;
       data.totals[type] += item.value;
 
       return data.totals;
