@@ -1,5 +1,3 @@
-// Precisa importar o polyfill
-// Precisa tirar os console logs
 const dataCtrl = (function dataController() {
 
   class Group {
@@ -57,6 +55,7 @@ const dataCtrl = (function dataController() {
       if (pos < 0 || pos === undefined) {
         const newGroup = new Group(name, type, text, 0);
         data.groups.push(newGroup);
+        
         return newGroup;
 
       } else {
@@ -86,24 +85,21 @@ const dataCtrl = (function dataController() {
       const sum = (total + item.value);
 
       group.total_value = parseFloat(sum.toFixed(2));
+
       return group.total_value;
     },
 
     updateTotals: (item, group) => {
       type = group.type;
       data.totals[type] += item.value;
+
       return data.totals;
     },
 
     getItemData: (item) => {
       let id = item.id;
 
-      if (item.type === 'inc') {
-        id = id.split('inc-');
-      } else {
-        id = id.split('exp-');
-      }
-
+      id = id.split(`${item.group}-`);
       id = parseInt(id[1]);
 
       const groupIndex = data.groups.findIndex((group, i) => (group.name === item.group));
@@ -130,33 +126,25 @@ const dataCtrl = (function dataController() {
         text: group.text,
         total_value: group.total_value
       };
+
       return groupObj;
     },
 
     verGroup: (item) => {
       if (data.groups[item.groupIndex].items.length === 0) {
         return true;
+
       } else {
         return false;
       }
     },
 
     deleteItem: (item) => {
-      let type;
-
-      if (item.type === 'inc') {
-        type = 0;
-      } else {
-        type = 1;
-      }
-      //data.groups[itemData.groupIndex].total_value += itemData.value;
       data.groups[item.groupIndex].items.splice(item.itemIndex, 1);
     },
 
     deleteGroup: (item, proceed) => {
-      if (proceed === true) {
-        data.groups.splice(item.groupIndex, 1);
-      }
+      if (proceed) data.groups.splice(item.groupIndex, 1);
     },
 
   };
@@ -165,18 +153,18 @@ const dataCtrl = (function dataController() {
 const UICtrl = (function UIController() {
   
   const DOMstrings = {
-    addBtn: '#add-btn',
-    createBtn: '#create-btn',
-    addForm: '#form-add',
-    inputValue: '#value',
-    selectGroup: '#group',
-    inputDesc: '#desc',
-    selectType: '#type',
-    container: '#cards-container',
-    containerInc: '#container-inc',
-    containerExp: '#container-exp',
-    containerMobile: '#container-mobile',
-    filterSelect: '#filter'
+    addBtn: 'add-btn',
+    createBtn: 'create-btn',
+    addForm: 'form-add',
+    inputValue: 'value',
+    selectGroup: 'group',
+    inputDesc: 'desc',
+    selectType: 'type',
+    container: 'cards-container',
+    containerInc: 'container-inc',
+    containerExp: 'container-exp',
+    containerMobile: 'container-mobile',
+    filterSelect: 'filter'
   };
 
   return {
@@ -185,31 +173,32 @@ const UICtrl = (function UIController() {
     },
 
     getInput: () => {
-      let inputValue = document.querySelector(DOMstrings.inputValue).value;
+      let inputValue = document.getElementById(DOMstrings.inputValue).value;
       if (inputValue.includes(',')) {
         inputValue = inputValue.replace(',','.');
-        while (newValue.includes(',')) {
+        while (inputValue.includes(',')) {
           inputValue = inputValue.replace(',', '');
         }
       }
+
       return {
-        groupName: document.querySelector(DOMstrings.selectGroup).value,
-        selectOptionIndex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
-        desc: document.querySelector(DOMstrings.inputDesc).value,
-        type: document.querySelector(DOMstrings.selectType).value,
+        groupName: document.getElementById(DOMstrings.selectGroup).value,
+        selectOptionIndex: document.getElementById(DOMstrings.selectGroup).selectedIndex,
+        desc: document.getElementById(DOMstrings.inputDesc).value,
+        type: document.getElementById(DOMstrings.selectType).value,
         value: parseFloat(inputValue),
-        filter: document.querySelector(DOMstrings.filterSelect).value
+        filter: document.getElementById(DOMstrings.filterSelect).value
       };
     },
 
     clearFields: () => {
-      document.querySelector(DOMstrings.inputDesc).value = '';
-      document.querySelector(DOMstrings.inputValue).value = '';
-      document.querySelector(DOMstrings.filterSelect).value = 'all';
+      document.getElementById(DOMstrings.inputDesc).value = '';
+      document.getElementById(DOMstrings.inputValue).value = '';
+      document.getElementById(DOMstrings.filterSelect).value = 'all';
     },
 
     setTypeInc: () => {
-      document.querySelector(DOMstrings.selectType).selectedIndex = 0;
+      document.getElementById(DOMstrings.selectType).selectedIndex = 0;
     },
 
     displayCharts: (winWidth) => {
@@ -221,9 +210,7 @@ const UICtrl = (function UIController() {
   
       let legDisplay = true;
   
-      if (winWidth >= 768) {
-        legDisplay = false;
-      }
+      if (winWidth >= 768) legDisplay = false;      
   
       Chart.defaults.global.responsive = true;
       Chart.defaults.global.legend.display = legDisplay;
@@ -300,10 +287,10 @@ const UICtrl = (function UIController() {
       if(!document.getElementById(group.name)) {
         if (group.type === 'inc') {       
           html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>+R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
+        
         } else {  
           html = "<div id='$ID' class='card shadow $TYPE'><div class='card__head'><div class='card__icon card__icon--$TYPE-ICON'><i class='fas $ICON fa-2x'></i></div><div class='card__data'><h2>$NAME<h2><h2 class='data__value'>-R$$VALUE</h2></div></div><ul class='card__list $LISTCLASS'></ul></div>";
         }
-      
         
         html = html.replace('$ID', group.name);
         html = html.replace('$TYPE', group.type);
@@ -315,13 +302,12 @@ const UICtrl = (function UIController() {
         if (html.includes('$LISTCLASS')) {
           html = html.replace('$LISTCLASS', group.name);
         }
-        /*
-        if(mobileDevice === true) {
-          document.querySelector(containerMobile).insertAdjacentHTML('beforeend', html);
-        } else*/ if (group.type === 'inc') {
-          document.querySelector(containerInc).insertAdjacentHTML('beforeend', html);
+        
+        if (group.type === 'inc') {
+          document.getElementById(containerInc).insertAdjacentHTML('beforeend', html);
+        
         } else {
-          document.querySelector(containerExp).insertAdjacentHTML('beforeend', html);
+          document.getElementById(containerExp).insertAdjacentHTML('beforeend', html);
         }
       }
     },
@@ -334,13 +320,14 @@ const UICtrl = (function UIController() {
 
       if (group.type === 'inc') {
         sign = '+';
-        id = `inc-${item.id}` ;
+
       } else {
         sign = '-';
-        id = `exp-${item.id}`;
       }
 
-      html = "<li class='card__list__item' id='$ID'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6><h2><a href='#' class='del-btn'>-</a></h2></div></li>";
+      id = `${group.name}-${item.id}` ;
+
+      html = "<li class='card__list__item' id='$ID'><div class='item__main-data'><h3>$DESC</h3><h4 class='data__value'>$SIGNR$$VALUE</h4></div><div><h6>$DATE</h6><h2><a href='javascript:' class='del-btn'>-</a></h2></div></li>";
 
       html = html.replace('$DESC', item.desc);
       html = html.replace('$VALUE', item.value);
@@ -385,8 +372,12 @@ const UICtrl = (function UIController() {
       let i;
       let balance;
 
-      balance = totals.exp/totals.inc * 100;
-      balance = balance.toFixed(2);
+      if (totals.exp > totals.inc) {
+        balance = 100;
+      } else {
+        balance = totals.exp/totals.inc * 100;
+        balance = balance.toFixed(2);
+      }
       
       charts[0].data.datasets[0].data[1] = balance;
       charts[0].data.datasets[0].data[0] = 100 - balance;
@@ -422,6 +413,7 @@ const UICtrl = (function UIController() {
       if (inc !== 0) {
         percent = exp/inc*100;
         percent = percent.toFixed(2);
+
       } else {
         percent = 0;
       }
@@ -433,46 +425,45 @@ const UICtrl = (function UIController() {
     },
 
     deleteItem: (item) => {
-      const DOMitem = document.getElementById(`${item.type}-${item.id}`);
+      const DOMitem = document.getElementById(`${item.group}-${item.id}`);
       DOMitem.parentNode.removeChild(DOMitem);
     },
 
     deleteGroup: (item, proceede) => {
       const card = document.getElementById(item.group);
-      if (proceede === true) {
-        card.parentNode.removeChild(card);
-      }
+      if (proceede) card.parentNode.removeChild(card);  
     },
 
     displayForm: () => {
-      const form = document.querySelector(DOMstrings.addForm);
+      const form = document.getElementById(DOMstrings.addForm);
       form.classList.toggle('js-hide');
     },
 
     hideForm: () => {
-      const form = document.querySelector(DOMstrings.addForm);
+      const form = document.getElementById(DOMstrings.addForm);
       form.classList.add('js-hide');
     },
 
     showForm: () => {
-      const form = document.querySelector(DOMstrings.addForm);
+      const form = document.getElementById(DOMstrings.addForm);
       form.classList.remove('js-hide');
     },
 
     showSelectedItems: (selection) => {
-      const containerInc = document.querySelector(DOMstrings.containerInc);
-      const containerExp = document.querySelector(DOMstrings.containerExp);
+      const containerInc = document.getElementById(DOMstrings.containerInc);
+      const containerExp = document.getElementById(DOMstrings.containerExp);
 
       containerInc.classList.remove('js-hide');
       containerExp.classList.remove('js-hide');
 
       if (selection === 'inc') {
         containerExp.classList.add('js-hide');
+
       } else if (selection === 'exp') {
         containerInc.classList.add('js-hide');
       }
     }
-  
+
   };
 }());
 
@@ -486,6 +477,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     if (mobileDevice === true && winWidth > 768) {
       mobileDevice = false;
       UICtrl.showForm();
+
     } else if (mobileDevice === false && winWidth < 768) {
       mobileDevice = true;
       UICtrl.hideForm();
@@ -494,17 +486,18 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
 
   const createCharts = function createAndGetChartsFromTheUIController(winWidth) {
     const charts = UICtrl.displayCharts(winWidth);
+
     return charts;
   };
 
 
-  const formatNum = function formatNumber(numIn) {
-    let numOut;
+  const formatNum = function formatNumber(input) {
+    let outputValue = input;
 
-    numOut = parseFloat(numIn.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,'));
-    numOut = Math.abs(numOut);
+    outputValue = Math.abs(outputValue);
+    outputValue = parseFloat(outputValue.toFixed(2));
 
-    return numOut;
+    return outputValue;
   };
 
   const ctrlAddItem = function addGroupAndItemToTheDataStructureAndUI() {
@@ -512,6 +505,7 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
     let totals;
     let newItem;
     let newGroup;
+    
     if (!isNaN(input.value)) {
       if (input.desc === '') input.desc = 'Sem descrição';        
       newGroup = dataCtrl.addGroup(input.groupName, input.type, options[input.type].names[input.selectOptionIndex]);
@@ -567,7 +561,6 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
   };
 
   const ctrlDelItem = function deleteItemFromDataAndUI(e) {
-// Mudar tudo aqui pra retornar os objetos dos items e grupos como estão na estrutura de dados    
     
     let item = getItemUI(e);
     item = dataCtrl.getItemData(item);
@@ -588,24 +581,27 @@ const mainCtrl = (function generalController(dataCtrl, UICtrl) {
 
   const setEvtLst = function setEventListeners() {
     const DOMobj = UICtrl.getDOMstrings();
-    document.querySelector(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
+    document.getElementById(DOMobj.addBtn).addEventListener('click', ctrlAddItem);
+
     document.addEventListener('keypress', (event) => {
       if (event.keycode === 13 || event.which === 13) ctrlAddItem();                   
     });
-    document.querySelector(DOMobj.selectType).addEventListener('change', () => {
+    
+    document.getElementById(DOMobj.selectType).addEventListener('change', () => {
       const input = UICtrl.getInput();
       UICtrl.updateOptions(options, input.type);
     });
 
-    document.querySelector(DOMobj.filterSelect).addEventListener('change', () => {
+    document.getElementById(DOMobj.filterSelect).addEventListener('change', () => {
       const input = UICtrl.getInput();
       UICtrl.showSelectedItems(input.filter);
     });
 
-    document.querySelector(DOMobj.createBtn).addEventListener('click', () => {
+    document.getElementById(DOMobj.createBtn).addEventListener('click', () => {
       UICtrl.displayForm();
     });
-    document.querySelector(DOMobj.container).addEventListener('click', ctrlDelItem);
+
+    document.getElementById(DOMobj.container).addEventListener('click', ctrlDelItem);
 
     window.addEventListener('resize', () => {
       winWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);

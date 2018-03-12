@@ -2,27 +2,27 @@
   <div class='container shadow'>
     <h2 class='form__title'>Adicionar</h2>
     <div class='form'>
-      <div class='row row--1'>
+      <div class='row row--grow-3'>
         <select name='type' id='type' class='form__element form__select-type select'>
           <option value='inc'>+</option>
           <option value='exp'>-</option>
         </select>
         <input type='text' id='desc' class='form__element form__input form__input--desc' placeholder='Descrição'>
       </div>
-      <div class='row row--2'>
+      <div class='row row--grow-2'>
         <select name='group' id='group' class='form__element form__select form__select-group select'>
           <option value='food'>Comida</option>
           <option value='ent'>Entreterimento</option>
           <option value='sal'>Salário</option>
         </select>
         </div>
-        <div class='row row--3'>
-         <input type='text' pattern="1234567890," id='value' class='form__element form__input form__input--value' placeholder='R$0,00'>
+        <div class='row row--grow-1'>
+         <input type='text' pattern="1234567890,." id='value' class='form__element form__input form__input--value' placeholder='R$0,00'>
       </div>
-      <div class='row row-center row--4'>
+      <div class='row row--center row--grow-1'>
         <button id='add-btn' class='form__element btn btn--add'>ENTRAR</button>
       </div>
     </div>
   </div>
 </section>
-<a class='btn btn--create' id='create-btn' href='#'>+</a>
+<button class='btn btn--create' id='create-btn' href='javascript:'>+</button>

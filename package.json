@@ -1,11 +1,12 @@
 {
   "name": "budget-management",
   "version": "1.0.0",
-  "description": "An application for budget management, which gets incomes and expenses data and show useful information and generate charts over it",
+  "description": "An application for budget management, which gets incomes and expenses data, show useful information and generate charts with it",
   "main": "dev.js",
   "scripts": {
     "start": "nodemon",
-    "babel": "babel --presets=env src/app.js --out-file public/app.js -w"
+    "babel": "babel --presets=env src/app.js --out-file public/app.js -w",
+    "uglify": "uglify-js --compress public/app.js --output public/app.js -w"
   },
   "author": "Matheus Baldissara",
   "license": "MIT",
@@ -14,8 +15,8 @@
     "express": "^4.16.2",
     "express-handlebars": "^3.0.0",
     "moment": "^2.21.0",
-    "mongoose": "^5.0.6",
-    "nodemon": "^1.17.1"
+    "nodemon": "^1.17.1",
+    "uglify-js": "^3.3.14"
   },
   "devDependencies": {
     "node-sass-middleware": "^0.11.0",

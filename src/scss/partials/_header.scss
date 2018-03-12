@@ -13,22 +13,15 @@
   display: flex;
   flex-wrap: nowrap;
   margin-top:8px;
-  justify-content: right;
-  @media screen and (min-width: 768px) {
-    justify-content: space-between;
-
-  }
+  justify-content: space-between;
 }
 
 .nav-list {
-    margin-top: 8px;
+  margin: 0;
 }
 
 .nav__title {
-  display: none;
-  @media screen and (min-width: 768px) {
-    display: block;
-  }
+  display: block;
 }
 
 .nav-list__item {

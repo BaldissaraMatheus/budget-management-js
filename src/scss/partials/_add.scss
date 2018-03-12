@@ -14,23 +14,19 @@
   margin-bottom: 20px
 }
 
-.row--1 {
+.row--grow-3 {
   flex-grow: 4;
 };
 
-.row--2 {
+.row--grow-2 {
   flex-grow: 2;
 };
 
-.row--3 {
+.row--grow-1 {
   flex-grow: 1;
 };
 
-.row--4 {
-  flex-grow: 1;
-}
-
-.row-center {
+.row--center {
   justify-content: center;
 }
 
@@ -67,10 +63,10 @@
   border: none;
   background-color: $green;
   color: $white;
+  cursor: pointer;
 }
 
 .btn--add {
-  cursor: pointer;
   @include box-shadow(5px, 5px, 10px, lighten($dark-gray, 10%));
 }
 
@@ -81,12 +77,11 @@
   z-index: 1;
   top: 80%;
   left: 80%;
+  padding: 0;
   font-size: 35px;
   text-align: center;
-  padding: 4px 1px 0 0;
   @include border-radius(25px);
   @include box-shadow(2px, 2px, 10px, lighten($dark-gray, 10%));
-
   @media screen and (min-width: 768px) {
     display: none;
   }
