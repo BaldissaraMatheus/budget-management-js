@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon",
     "babel": "babel --presets=env src/app.js --out-file public/app.js -w",
-    "uglify": "uglify-js --compress public/app.js --output public/app.js -w"
+    "uglify": "uglifyjs public/app.js --compress --output public/app.min.js"
   },
   "author": "Matheus Baldissara",
   "license": "MIT",
