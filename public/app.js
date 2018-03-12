@@ -187,7 +187,7 @@ var UICtrl = function UIController() {
     containerInc: '#container-inc',
     containerExp: '#container-exp',
     containerMobile: '#container-mobile',
-    delBtn: '.del-btn'
+    filterSelect: '#filter'
   };
 
   return {
@@ -197,11 +197,10 @@ var UICtrl = function UIController() {
 
     getInput: function getInput() {
       var inputValue = document.querySelector(DOMstrings.inputValue).value;
-      var newValue = void 0;
       if (inputValue.includes(',')) {
-        newValue = inputValue.replace(',', '.');
+        inputValue = inputValue.replace(',', '.');
         while (newValue.includes(',')) {
-          newValue = newValue.replace(',', '');
+          inputValue = inputValue.replace(',', '');
         }
       }
       return {
@@ -209,13 +208,15 @@ var UICtrl = function UIController() {
         selectOptionIndex: document.querySelector(DOMstrings.selectGroup).selectedIndex,
         desc: document.querySelector(DOMstrings.inputDesc).value,
         type: document.querySelector(DOMstrings.selectType).value,
-        value: parseFloat(newValue)
+        value: parseFloat(inputValue),
+        filter: document.querySelector(DOMstrings.filterSelect).value
       };
     },
 
     clearFields: function clearFields() {
       document.querySelector(DOMstrings.inputDesc).value = '';
       document.querySelector(DOMstrings.inputValue).value = '';
+      document.querySelector(DOMstrings.filterSelect).value = 'all';
     },
 
     setTypeInc: function setTypeInc() {
@@ -432,17 +433,31 @@ var UICtrl = function UIController() {
 
     displayForm: function displayForm() {
       var form = document.querySelector(DOMstrings.addForm);
-      form.classList.toggle('js-form--hide');
+      form.classList.toggle('js-hide');
     },
 
     hideForm: function hideForm() {
       var form = document.querySelector(DOMstrings.addForm);
-      form.classList.add('js-form--hide');
+      form.classList.add('js-hide');
     },
 
     showForm: function showForm() {
       var form = document.querySelector(DOMstrings.addForm);
-      form.classList.remove('js-form--hide');
+      form.classList.remove('js-hide');
+    },
+
+    showSelectedItems: function showSelectedItems(selection) {
+      var containerInc = document.querySelector(DOMstrings.containerInc);
+      var containerExp = document.querySelector(DOMstrings.containerExp);
+
+      containerInc.classList.remove('js-hide');
+      containerExp.classList.remove('js-hide');
+
+      if (selection === 'inc') {
+        containerExp.classList.add('js-hide');
+      } else if (selection === 'exp') {
+        containerInc.classList.add('js-hide');
+      }
     }
 
   };
@@ -495,6 +510,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       totals = dataCtrl.updateTotals(newItem, newGroup);
       UICtrl.updateCharts(charts, newItem, newGroup, totals);
       UICtrl.updateBudget(totals.inc, totals.exp);
+      UICtrl.showSelectedItems('all');
       UICtrl.clearFields();
     }
   };
@@ -504,6 +520,7 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
     UICtrl.updateBudget(0, 0);
     UICtrl.setTypeInc();
     UICtrl.updateOptions(dataCtrl.getOptions(), 'inc');
+    UICtrl.showSelectedItems('all');
   };
 
   var getItemUI = function getSelectedItem(e) {
@@ -565,6 +582,12 @@ var mainCtrl = function generalController(dataCtrl, UICtrl) {
       var input = UICtrl.getInput();
       UICtrl.updateOptions(options, input.type);
     });
+
+    document.querySelector(DOMobj.filterSelect).addEventListener('change', function () {
+      var input = UICtrl.getInput();
+      UICtrl.showSelectedItems(input.filter);
+    });
+
     document.querySelector(DOMobj.createBtn).addEventListener('click', function () {
       UICtrl.displayForm();
     });

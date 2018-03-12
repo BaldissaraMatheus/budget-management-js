@@ -1,6 +1,5 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
-const mongoose = require('mongoose');
 const sassmiddleware = require('node-sass-middleware');
 const path = require('path');
 const app = express();
@@ -16,11 +15,6 @@ app.use(
 );   
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Conecta com mongoose
-mongoose.connect('mongodb://localhost/budget-management')
-  .then(() => console.log('Banco de dados conectado'))
-  .catch((err) => console.log(err));
 
 // Handlebars middleware
 app.engine('handlebars', exphbs({
