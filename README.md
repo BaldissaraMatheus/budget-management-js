@@ -1,4 +1,4 @@
 # budget-management-js
-An application for budget management, which gets incomes and expenses data and generate charts with it
+Aplicação de administração de recursos, que gera gráficos a partir de dados de rendas e gastos.
 
 ![wuba duba dub dub](https://i.imgur.com/bPltC2A.png)
